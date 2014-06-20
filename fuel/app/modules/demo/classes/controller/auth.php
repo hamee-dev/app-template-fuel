@@ -2,7 +2,7 @@
 
 namespace Demo;
 
-class Controller_Auth extends \Controller_Template {
+class Controller_Auth extends \Controller {
 	/**
 	 * route: /demo/auth/login
 	 */
