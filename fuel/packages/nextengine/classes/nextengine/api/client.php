@@ -58,4 +58,12 @@ class Client extends \neApiClient
 
 		parent::__construct($this->_client_id, $this->_client_secret, $this->_redirect_uri);
 	}
+
+	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
+		return parent::apiExecute($path, $api_params, $redirect_uri);
+	}
+
+	public function neLogin($redirect_uri = NULL) {
+		return parent::neLogin($redirect_uri);
+	}
 }
