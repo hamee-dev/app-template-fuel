@@ -58,30 +58,4 @@ class Client extends \neApiClient
 
 		parent::__construct($this->_client_id, $this->_client_secret, $this->_redirect_uri);
 	}
-
-	/**
-	* Get a config setting.
-	*
-	* @param string $key the config key
-	* @param mixed  $default the default value
-	* @return mixed the config setting value
-	*/
-	public function get_config($key, $default = null)
-	{
-		return \Arr::get($this->config, $key, $default);
-	}
-
-	/**
-	* Set a config setting.
-	*
-	* @param string $key the config key
-	* @param mixed $value the new config value
-	* @return object $this for chaining
-	*/
-	public function set_config($key, $value)
-	{
-		\Arr::set($this->config, $key, $value);
-
-		return $this;
-	}
 }
