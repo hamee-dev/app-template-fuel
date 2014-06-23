@@ -4,7 +4,7 @@
  * アプリのベースとなるモデルクラス。  
  * 全てのモデルクラスの基点はこのクラスとなる。
  */
-class Model_User extends \Model_Crud
+class Model_User
 {
 	protected static $_table_name = null;
 	protected static $_properties = array();
