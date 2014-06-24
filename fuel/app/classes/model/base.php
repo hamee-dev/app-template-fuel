@@ -1,18 +1,38 @@
 <?php
 
 /**
- * アプリのベースとなるモデルクラス。
- * 全てのモデルクラスの基点はこのクラスとなる。
+ * アプリのベースとなるモデルクラス。全てのモデルクラスの基点はこのクラスとなる。
+ * こいつ自身をインスタンス化する意味が無いのでabstractにしています。
+ * 
+ * ### クラス名とテーブル名の命名規約
+ * クラス名とテーブル名を縛ることで、命名規約に則りさえすれば、楽にモデルのコードを書くことが出来る。
+ * 
+ * FuelPHPのモデルクラスは'Model_**'となるので、model_を取り払った**を複数形にしたものがテーブル名となる。  
+ * ex) Model_Base => 'bases', Model_Test => 'tests', Model_HogeHoge => 'hogehoges'
+ * 
+ * 
+ * ### プロパティ名とカラム名の命名規約
+ * Model_Baseは、ignoreSaveKeyプロパティに指定されていないプロパティ名は、自動的に保存しようとします。
+ * なので、DBのカラム名とモデルのプロパティは必ず一致させてください。
+ * また、カラムなのかモデルのプロパティなのか、明確に分けるための命名規約が以下のとおりです。  
+ * 
+ * |種類           |命名規則|
+ * |DBのカラム      |スネークケース|
+ * |モデルのプロパティ|キャメルケース|
+ * 
+ * と命名規則を分けてください。
+ * Model_Baseで言えば、id, created_at, updated_atがカラム名（スネークケース）  
+ * validationErrors, ignoreSaveKeyがモデルのプロパティ（キャメルケース）です。
  * 
  * @author Shingo Inoue <inoue.shingo@hamee.co.jp>
  */
-class Model_Base
+abstract class Model_Base
 {
 	/**
 	 * カラムのID
 	 * @var string
 	 */
-	public $id;
+	public $id = null;
 
 	/**
 	 * DBへの挿入日時
@@ -37,11 +57,9 @@ class Model_Base
 	 * ここに指定していないプロパティは、全て保存処理がされてしまうので注意。
 	 * @var string[]
 	 */
-	protected static $ignore_save_key = array(
-		'ignore_save_key',
+	protected static $ignoreSaveKey = array(
+		'ignoreSaveKey',
 		'id',
-		'created_at',
-		'updated_at',
 		'validationErrors',
 	);
 
@@ -95,10 +113,13 @@ class Model_Base
 		$query = DB::insert($table_name)->set($this->toArray());
 
 		if($insert_ignore) {
-			// 'INSERT'を'INSERT IGNORE'に置き換える。
 			// NOTE: FuelPHPにINSERT IGNOREをサポートする機能が存在しないため、SQLを置き換える方法で実装。
 			$current_sql = $query->compile();
-			$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6));
+
+			// SQLが'INSERT'もしくは'insert'で始まっていたら、'INSERT IGNORE'に置き換える。
+			if(Str::start_with($current_sql, 'INSERT', true)) {
+				$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6));
+			}
 		}
 
 		$this->before_save($query);
@@ -166,6 +187,17 @@ class Model_Base
 	 * 
 	 * インスタンスが既にDBに挿入されているか否かを考慮せずに呼び出すインタフェースを提供する。
 	 * 現在のインスタンスにidがセットされていれば`update`を、idがセットされていなければ`insert`を呼ぶ。
+	 * 
+	 * しかし、内部の挙動は単にメソッドを分けているだけなので、
+	 * `INSERT INTO ... DUPLICATE KEY UPDATE ...`
+	 * のようなSQLを発行しているわけではありません。
+	 * 
+	 * そのためsaveは、**シビアなタイミングまで求めると、DBの整合性を保証できるものではありません。**
+	 * しかし、上記のようなクエリを打つと挿入に時間がかかるため、デフォルトの動作にはしたくありません。
+	 * よって基底クラスとしては、動作が軽いsaveメソッドの実装を選択しています。
+	 * 
+	 * そのため、**シビアなタイミング制御が必要になった場合は、その処理は自前で実装してください。**
+	 * 
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
 	public function save($insert_ignore = false) {
@@ -181,7 +213,7 @@ class Model_Base
 	 * @return array
 	 */
 	public function toArray() {
-		$ignores = array_merge(self::$ignore_save_key, static::$ignore_save_key);
+		$ignores = array_merge(self::$ignoreSaveKey, static::$ignoreSaveKey);
 
 		$ret = array();
 		$props = get_class_vars(get_called_class());
@@ -212,34 +244,32 @@ class Model_Base
 	 * ### sample
 	 * ```php
 	 * Model_Base::create(array(
-	 * 	array(
-	 * 		'username',
-	 * 		'password',
-	 * 	),
-	 * 	array(
-	 * 		array('hogehoge', 'hugahuga', 'foooooooooo'),
-	 * 		array('foobar',   'hige',     'fizzbuzz'),
-	 * 	),
+	 * 	'username',
+	 * 	'password',
+	 * ),
+	 * array(
+	 * 	array('hogehoge', 'hugahuga', 'foooooooooo'),
+	 * 	array('foobar',   'hige',     'fizzbuzz'),
 	 * ));
 	 * ```
 	 * 
 	 * ### なぜkey-valueの連想配列を与えないのか
-	 * PHPの連想配列はメモリをとても食うため、配列のみで済ましたいため第一引数がややこしくなっています。
+	 * PHPの連想配列はメモリをとても食うため、配列のみで済ましたい。よって第１,第２引数がややこしくなっています。ご了承ください
 	 * 
-	 * @param  array   $attributes    [(array)カラム名の集合, (array)値の集合]
+	 * @param  array   $columns       カラム名を列挙した配列。ここで指定したカラム順にvaluesを設定する。
+	 * @param  array   $values        値の列挙。１つ１つのカラムに挿入する値を配列で指定する。
 	 * @param  boolean $insert_ignore INSERT IGNORE句を使用する
 	 * @return array   挿入されたインスタンスの配列
 	 */
-	public static function create(array $attributes, $insert_ignore = false) {
-		list($columns, $values) = $attributes;
-
+	public static function create(array $columns, array $values, $insert_ignore = false) {
 		$ret = array();
-		for($i = 0; $i < count($values[0]); $i++) {
+		// NOTE: デバッグの際に検索しやすいよう、$iではなく重複しにくい$iiを使用している。
+		for($ii = 0, $length = count($values[0]); $ii < $length; $ii++) {
 			$model = new static();
 
 			// 値をセット
 			foreach($columns as $j => $column) {
-				$model->{$column} = $values[$j][$i];
+				$model->{$column} = $values[$j][$ii];
 			}
 
 			$model->save();
@@ -257,25 +287,24 @@ class Model_Base
 	public static function find($id) {
 		$table_name = (new static())->_getTableName();
 		$query = DB::select()
-				   ->from($table_name)
-				   ->where('id', $id)
-				   ->limit(1)
-				   ->as_object(get_called_class());
+					->from($table_name)
+					->where('id', $id)
+					->limit(1)
+					->as_object(get_called_class());
 
 		$ret = $query->execute();
 		return self::after_find($ret[0]);
 	}
 
 	/**
-	 * 指定されたIDのデータのみ取得する
-	 * @param	int	$id 取得したいデータのID
-	 * @return mixed 指定されたIDが見つかればモデルのインスタンス、無ければnull
+	 * テーブル内のデータを全件取得する
+	 * @return array テーブル全行のデータをインスタンス化した要素の配列、１件もデータがない場合は空配列
 	 */
 	public static function findAll() {
 		$table_name = (new static())->_getTableName();
 		$query = DB::select()
-				   ->from($table_name)
-				   ->as_object(get_called_class());
+					->from($table_name)
+					->as_object(get_called_class());
 
 		$ret = $query->execute();
 		return self::after_find($ret->as_array());
@@ -283,17 +312,17 @@ class Model_Base
 
 	/**
 	 * 条件を１つ指定しデータを取得する
-	 * @param	string	$column		検索に使用するカラム名
-	 * @param	string	$value		一致させたい値
-	 * @param	string	$operator	使用する演算子(デフォルトは=)
-	 * @return array
+	 * @param  string $column	検索に使用するカラム名
+	 * @param  string $value	一致させたい値
+	 * @param  string $operator	使用する演算子(デフォルトは'=')
+	 * @return array 条件にマッチした行をインスタンス化した要素の配列
 	 */
 	public static function findBy($column, $value, $operator = '=') {
 		$table_name = (new static())->_getTableName();
 		$query = DB::select()
-				   ->from($table_name)
-				   ->where($column, $operator, $value)
-				   ->as_object(get_called_class());
+					->from($table_name)
+					->where($column, $operator, $value)
+					->as_object(get_called_class());
 
 		$ret = $query->execute();
 
@@ -305,13 +334,16 @@ class Model_Base
 	 * @param	string	$column	検索に使用するカラム名
 	 * @param	string	$value	部分一致させたい値
 	 * @see findBy
-	 * @return array
+	 * @return array 条件にマッチした行をインスタンス化した要素の配列
 	 */
 	public static function findLike($column, $value) {
 		return self::findBy($column, "%$value%", 'LIKE');
 	}
 
 	/**
+	 * FuelPHPのModel_Crudから持ってきて、このクラス用に改造しました。
+	 * http://fuelphp.jp/docs/1.7/classes/model_crud/methods.html#/method_count
+	 *
 	 * Count all of the rows in the table.
 	 *
 	 * @param   string  Column to count by
@@ -512,10 +544,7 @@ class Model_Base
 
 	/**
 	 * モデルのクラス名からテーブル名を取得する
-	 * 
-	 * クラス名とテーブル名を縛ることで、命名規約に則りさえすれば、楽にモデルのコードを書くことが出来る。
-	 * FuelPHPのモデルはModel_**となるので、model_を取り払った**を複数形にしたものがテーブル名となる。
-	 * ex) Model_Base => 'bases', Model_Test => 'tests', Model_HogeHoge => 'hogehoges'
+	 * クラス上部の説明にある命名規則を参照。
 	 * 
 	 * @return string クラス名を小文字かつ複数形にしたテーブル名
 	 */
