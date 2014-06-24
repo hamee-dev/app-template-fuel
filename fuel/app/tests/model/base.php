@@ -57,11 +57,11 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
      * テストコード
      */
 	function test___construct_第一引数は省略可能() {
-		$model = new Model_Base();
+		$model = new Model_Test();
 		$this->assertInstanceOf('Model_Base', $model);
 	}
 	function test___construct_第一引数に連想配列を渡すとそのキーと値がプロパティに設定される() {
-		$model = new Model_Base(array(
+		$model = new Model_Test(array(
 			'a' => 1,
 			'b' => 2,
 			'c' => 3,
@@ -75,7 +75,7 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 	// function test_forge_内部で__constructが呼ばれる() {}
 
 	function test_isNew_newでインスタンス作成したらtrue() {
-		$model = new Model_Base();
+		$model = new Model_Test();
 		$this->assertTrue($model->isNew());
 	}
 	// function test_isNew_DBから取得したデータでインスタンス作成したらfalse() {}
