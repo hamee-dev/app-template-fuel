@@ -2,18 +2,10 @@
 
 class Model_User extends Model_Base
 {
-	protected static $_properties = array(
-		'id',
-		'company_id',
-		'uid',
-		'next_engine_id',
-		'email',
-		'access_token',
-		'refresh_token',
-		'created_at',
-		'updated_at',
-	);
-
-	protected static $_table_name = 'users';
-
+	public $company_id     = null;
+	public $uid            = null;
+	public $next_engine_id = null;
+	public $email          = null;
+	public $access_token   = null;
+	public $refresh_token  = null;
 }
