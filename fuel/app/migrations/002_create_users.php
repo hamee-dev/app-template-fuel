@@ -19,6 +19,8 @@ class Create_users
 
 		), array('id'), true, 'InnoDB');
 
+		\DBUtil::create_index('users', 'uid', 'unique_uid', 'unique');
+
 		\DBUtil::add_foreign_key('users', array(
 			'constraint' => 11,
 			'key' => 'company_id',
