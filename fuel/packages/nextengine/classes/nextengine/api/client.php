@@ -4,7 +4,7 @@ namespace Nextengine\Api;
 
 require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 
-// class NextengineApiException extends \FuelException {}
+class NextengineApiException extends \FuelException {}
 // class NextengineApi**Exception extends NextengineApiException {}
 
 class Client extends \neApiClient
@@ -69,7 +69,7 @@ class Client extends \neApiClient
 
 		// TODO: resultがsuccessじゃなかったらエラーコードによって例外を投げる
 		if($response['result'] !== self::RESULT_SUCCESS) {
-			$this->throwApiException($response['code'], $response['message']);
+			$this->failover($response['code'], $response['message']);
 		}
 
 		return $response;
@@ -79,7 +79,8 @@ class Client extends \neApiClient
 		return parent::neLogin($redirect_uri);
 	}
 
-	protected function throwApiException($code, $message) {
-
+	protected function failover($code, $message) {
+		// TODO: ログの出力/メール送信
+		throw new NextengineApiException($code, $message);
 	}
 }
