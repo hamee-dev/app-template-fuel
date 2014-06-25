@@ -8,32 +8,43 @@ class Model_Test extends Model_Base {
 	public $content = null;
 }
 
+define('HOGE', 1);
+
 /**
  * Model_Baseのテスト
  */
 class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 {
-	static private $pdo = null;
-	private $conn = null;
+	private static $pdo;
+	private static $conn = null;
 
 	/**
 	 * フィクスチャの定義
 	 */
-	final public function getConnection() {
-		// FIXME: configから設定を読み込む
-		$dsn = 'mysql:host=192.168.56.110;port=3306;dbname=ne_base';
-		$username = 'root';
-		$password = 'hamee831';
+	// テスト実行前に一度だけ設定を読み込みPDOのインスタンスを作成する
+	public static function setUpBeforeClass() {
+		// loadをしないとDBクラスが使用されるまで設定が読み込まれないので明示的に読み込み
+		Config::load('db', true);
+		$config = Config::get('db.default.connection');
 
-		if ($this->conn === null) {
-			if (self::$pdo == null) {
-				self::$pdo = new PDO($dsn, $username, $password);
-			}
-			$this->conn = $this->createDefaultDBConnection(self::$pdo, 'ne_base');
-		}
-		return $this->conn;
+		// DSNからデータベース名を取得
+		preg_match('/dbname=(\w+)$/', $config['dsn'], $matched);
+		define('DB_NAME', $matched[1]);
+
+		self::$pdo = new PDO($config['dsn'], $config['username'], $config['password']);
 	}
 
+	// テストケースごとのフィクスチャのリセット(PHPUnitが勝手に使う)や、
+	// テストケース内で行数の取得など、DBクラスを用いずDBに接続したい場合に使用する
+	public function getConnection() {
+		// 接続を使いまわす
+		if (self::$conn === null) {
+			self::$conn = $this->createDefaultDBConnection(self::$pdo, DB_NAME);
+		}
+		return self::$conn;
+	}
+
+	// DBの構造をseed.ymlの内容でリセットする
 	public function getDataSet() {
 		return new PHPUnit_Extensions_Database_DataSet_YamlDataSet(__DIR__."/seed.yml");
 	}
@@ -96,10 +107,10 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertFalse($model->isNew());
 	}
 
-	function test_validate_内部でbefore_validateフックが呼ばれる() {
-		$mock = $this->getHookMock('Model_Test', 'before_validate');
-		$mock->validate();
-	}
+	// function test_validate_内部でbefore_validateフックが呼ばれる() {
+	// 	$mock = $this->getHookMock('Model_Test', 'before_validate');
+	// 	$mock->validate();
+	// }
 	function test_validate_内部でafter_validateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_validate');
 		$mock->validate();
