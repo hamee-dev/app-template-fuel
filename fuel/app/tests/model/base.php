@@ -107,10 +107,10 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertFalse($model->isNew());
 	}
 
-	// function test_validate_内部でbefore_validateフックが呼ばれる() {
-	// 	$mock = $this->getHookMock('Model_Test', 'before_validate');
-	// 	$mock->validate();
-	// }
+	function test_validate_内部でbefore_validateフックが呼ばれる() {
+		$mock = $this->getHookMock('Model_Test', 'before_validate');
+		$mock->validate();
+	}
 	function test_validate_内部でafter_validateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_validate');
 		$mock->validate();
