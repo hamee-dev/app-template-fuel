@@ -55,11 +55,13 @@ abstract class Model_Base
 	/**
 	 * 保存時に除外するプロパティ
 	 * ここに指定していないプロパティは、全て保存処理がされてしまうので注意。
+	 * NOTE: updated_atは自動更新するので触らない(on UPDATE on update CURRENT_TIMESTAMPが設定されている)
 	 * @var string[]
 	 */
 	protected static $ignoreSaveKey = array(
 		'ignoreSaveKey',
 		'id',
+		'updated_at',
 		'validationErrors',
 	);
 
@@ -110,6 +112,12 @@ abstract class Model_Base
 	 */
 	public function insert($insert_ignore = false) {
 		$table_name = $this->_getTableName();
+
+		// created_atが指定されていたらその値を優先する、無ければNOW()を格納
+		if(is_null($this->created_at)) {
+			$this->created_at = DB::expr('NOW()');
+		}
+
 		$query = DB::insert($table_name)->set($this->toArray());
 
 		if($insert_ignore) {
