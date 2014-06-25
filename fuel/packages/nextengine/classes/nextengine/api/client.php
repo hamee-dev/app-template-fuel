@@ -5,9 +5,14 @@ namespace Nextengine\Api;
 require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 
 // class NextengineApiException extends \FuelException {}
+// class NextengineApi**Exception extends NextengineApiException {}
 
 class Client extends \neApiClient
 {
+	const RESULT_SUCCESS  = 'success';
+	const RESULT_ERROR    = 'error';
+	const RESULT_REDIRECT = 'redirect';
+
 	/**
 	 * Default config
 	 * @var array
@@ -31,8 +36,8 @@ class Client extends \neApiClient
 	/**
 	 * Nextengine driver forge.
 	 *
-	 * @param	array			$config		Config array
-	 * @return  Nextengine
+	 * @param  array $config Config array
+	 * @return Nextengine
 	 */
 	public static function forge($config = array())
 	{
@@ -52,18 +57,29 @@ class Client extends \neApiClient
 	{
 		$config = \Arr::merge($config, self::$_defaults);
 
-		$this->_client_id		= $config['client_id'];
-		$this->_client_secret	= $config['client_secret'];
-		$this->_redirect_uri	= $config['redirect_uri'];
+		$this->_client_id     = $config['client_id'];
+		$this->_client_secret = $config['client_secret'];
+		$this->_redirect_uri  = $config['redirect_uri'];
 
 		parent::__construct($this->_client_id, $this->_client_secret, $this->_redirect_uri);
 	}
 
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
-		return parent::apiExecute($path, $api_params, $redirect_uri);
+		$response = parent::apiExecute($path, $api_params, $redirect_uri);
+
+		// TODO: resultがsuccessじゃなかったらエラーコードによって例外を投げる
+		if($response['result'] !== self::RESULT_SUCCESS) {
+			$this->throwApiException($response['code'], $response['message']);
+		}
+
+		return $response;
 	}
 
 	public function neLogin($redirect_uri = NULL) {
 		return parent::neLogin($redirect_uri);
+	}
+
+	protected function throwApiException($code, $message) {
+
 	}
 }
