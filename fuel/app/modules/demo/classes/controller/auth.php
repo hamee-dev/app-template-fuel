@@ -10,8 +10,6 @@ class Controller_Auth extends \Controller {
 
 	public static function _init()
 	{
-		// /demo/auth/callbackにリダイレクトする
-		$redirect_uri = \Uri::base(false).'demo/auth/callback';
 		self::$client = new \Nextengine\Api\Client();
 	}
 
