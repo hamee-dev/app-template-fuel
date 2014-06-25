@@ -33,12 +33,16 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 
 		self::$pdo = new PDO($config['dsn'], $config['username'], $config['password']);
 	}
+	public static function tearDownAfterClass() {
+		self::$pdo = null;
+		self::$conn = null;
+	}
 
 	// テストケースごとのフィクスチャのリセット(PHPUnitが勝手に使う)や、
 	// テストケース内で行数の取得など、DBクラスを用いずDBに接続したい場合に使用する
 	public function getConnection() {
 		// 接続を使いまわす
-		if (self::$conn === null) {
+		if(is_null(self::$conn)) {
 			self::$conn = $this->createDefaultDBConnection(self::$pdo, DB_NAME);
 		}
 		return self::$conn;
