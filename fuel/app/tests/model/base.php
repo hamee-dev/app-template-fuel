@@ -3,7 +3,7 @@
 // testsテーブルを用いてデータをDBに保存するテストを行うためのモデル
 class Model_Test extends Model_Base {
 	public $hoge = 1;
-	protected static $ignore_save_key = array('hoge');
+	protected static $ignoreSaveKey = array('hoge');
 
 	public $content = null;
 }
@@ -16,9 +16,9 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 	static private $pdo = null;
 	private $conn = null;
 
-    /**
-     * フィクスチャの定義
-     */
+	/**
+	 * フィクスチャの定義
+	 */
 	final public function getConnection() {
 		// FIXME: configから設定を読み込む
 		$dsn = 'mysql:host=192.168.56.110;port=3306;dbname=ne_base';
@@ -26,21 +26,29 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$password = 'hamee831';
 
 		if ($this->conn === null) {
-            if (self::$pdo == null) {
-                self::$pdo = new PDO($dsn, $username, $password);
-            }
-            $this->conn = $this->createDefaultDBConnection(self::$pdo, 'ne_base');
-        }
-        return $this->conn;
-    }
+			if (self::$pdo == null) {
+				self::$pdo = new PDO($dsn, $username, $password);
+			}
+			$this->conn = $this->createDefaultDBConnection(self::$pdo, 'ne_base');
+		}
+		return $this->conn;
+	}
 
 	public function getDataSet() {
 		return new PHPUnit_Extensions_Database_DataSet_YamlDataSet(__DIR__."/seed.yml");
-    }
+	}
 
-    /**
-     * ユーティリティ
-     */
+	/**
+	 * ユーティリティ
+	 */
+	private function getGetTableName($class_name) {
+		$ref = new ReflectionClass($class_name);
+		$_getTableName = $ref->getMethod('_getTableName');
+		$_getTableName->setAccessible(true);
+
+		return $_getTableName;
+	}
+
 	private function getHookMock($classname, $hookname) {
 		$mock = $this->getMock($classname, array($hookname));
 		$mock->expects($this->once())->method($hookname);
@@ -49,13 +57,17 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 
 	private function getHookFirstArgument($classname, $hookname, $expected) {
 		$mock = $this->getMock($classname, array($hookname));
-		$mock->expects($this->once())->method($hookname)->with($expected);
+
+		$mock->expects($this->once())
+			->method($hookname)
+			->with($expected);
+
 		return $mock;
 	}
 
-    /**
-     * テストコード
-     */
+	/**
+	 * テストコード
+	 */
 	function test___construct_第一引数は省略可能() {
 		$model = new Model_Test();
 		$this->assertInstanceOf('Model_Base', $model);
@@ -72,41 +84,49 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertEquals($model->c, 3);
 	}
 
+	// FIXME: __constructをモック化してテストする方法が分からない
 	// function test_forge_内部で__constructが呼ばれる() {}
 
-	function test_isNew_newでインスタンス作成したらtrue() {
+	function test_isNew_まだDBに存在しないデータならtrueを返す() {
 		$model = new Model_Test();
 		$this->assertTrue($model->isNew());
 	}
-	// function test_isNew_DBから取得したデータでインスタンス作成したらfalse() {}
+	function test_isNew_既にDBに存在しているデータならfalseを返す() {
+		$model = Model_Test::find(1);
+		$this->assertFalse($model->isNew());
+	}
 
-	function test_validate_before_validateフックが呼ばれる() {
+	function test_validate_内部でbefore_validateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_validate');
 		$mock->validate();
 	}
-	function test_validate_after_validateフックが呼ばれる() {
+	function test_validate_内部でafter_validateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_validate');
 		$mock->validate();
 	}
 
-	function test_create_before_insertフックが呼ばれる() {
+	function test_create_内部でbefore_insertフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_insert');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->insert(); } catch(Exception $e) {}
 	}
-	function test_create_after_insertフックが呼ばれる() {
+	function test_create_内部でafter_insertフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_insert');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->insert(); } catch(Exception $e) {}
 	}
 	function test_create_DBに挿入が行える() {
 		$rows = $this->getConnection()->getRowCount('tests');
+
 		$model = new Model_Test(array(
 			'content' => 'hogehogehoge'
 		));
 		$model->insert();
 
-		$this->assertEquals($rows + 1, $this->getConnection()->getRowCount('tests'));
+		$after_insert_rows = $this->getConnection()->getRowCount('tests');
+		$this->assertEquals($rows + 1, $after_insert_rows);
 	}
 	function test_create_戻り値はboolean() {
 		$model = Model_Test::find(1);
@@ -116,24 +136,28 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertTrue(is_bool($model->insert()));
 	}
 
-	function test_update_before_updateフックが呼ばれる() {
+	function test_update_内部でbefore_updateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_update');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->update(); } catch(Exception $e) {}
-	}
-	function test_update_after_updateフックが呼ばれる() {
-		$mock = $this->getHookMock('Model_Test', 'after_update');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->update(); } catch(Exception $e) {}
-	}
-	function test_update_updateしてもDBの行数は増えない() {
-		$rows = $this->getConnection()->getRowCount('tests');
-		$model = Model_Test::find(1);
 
-		$model->update();
-		$this->assertEquals($rows, $this->getConnection()->getRowCount('tests'));
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->update(); } catch(Exception $e) {}
 	}
-	function test_update_プロパティを更新してupdateするとそのカラムの値が変化している() {
+	function test_update_内部でafter_updateフックが呼ばれる() {
+		$mock = $this->getHookMock('Model_Test', 'after_update');
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->update(); } catch(Exception $e) {}
+	}
+	function test_update_DBの行数は変わらない() {
+		$rows = $this->getConnection()->getRowCount('tests');
+
+		$model = Model_Test::find(1);
+		$model->update();
+
+		$after_update_rows = $this->getConnection()->getRowCount('tests');
+		$this->assertEquals($rows, $after_update_rows);
+	}
+	function test_update_変更した値がDBに反映される() {
 		$rows = $this->getConnection()->getRowCount('tests');
 		$model = Model_Test::find(1);
 
@@ -150,27 +174,47 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertTrue(is_bool($model->update()));
 	}
 
-	function test_save_before_saveフックが呼ばれる() {
+	function test_save_内部でbefore_saveフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_save');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->save(); } catch(Exception $e) {}
-	}
-	function test_save_after_saveフックが呼ばれる() {
-		$mock = $this->getHookMock('Model_Test', 'after_save');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->save(); } catch(Exception $e) {}
-	}
-	// function test_save_newしたインスタンスならinsertが呼ばれる() {}
-	// function test_save_DBから取得したインスタンスならupdateが呼ばれる() {}
 
-	function test_delete_before_deleteフックが呼ばれる() {
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->save(); } catch(Exception $e) {}
+	}
+	function test_save_内部でafter_saveフックが呼ばれる() {
+		$mock = $this->getHookMock('Model_Test', 'after_save');
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->save(); } catch(Exception $e) {}
+	}
+	function test_save_DBに存在しないデータならinsertが呼ばれる() {
+		$mock = $this->getHookMock('Model_Test', 'insert');
+		$mock->expects($this->once())
+			->method('insert');
+
+		$model = new Model_Test();
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->save(); } catch(Exception $e) {}
+	}
+	function test_save_DBから取得したデータならupdateが呼ばれる() {
+		$mock = $this->getMock('Model_Test', array('update'));
+		$mock->expects($this->once())
+			->method('update');
+
+		// DBから取得してきたデータを模すために、明示的にidを設定する
+		$mock->id = 1;
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
+		try { $mock->save(); } catch(Exception $e) {}
+	}
+
+	function test_delete_内部でbefore_deleteフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_delete');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->delete(); } catch(Exception $e) {}
 	}
-	function test_delete_after_deleteフックが呼ばれる() {
+	function test_delete_内部でafter_deleteフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_delete');
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->delete(); } catch(Exception $e) {}
 	}
 	function test_delete_DBから削除ができる() {
@@ -188,9 +232,10 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertTrue(is_bool($model->delete()));
 	}
 
+	// FIXME: staticメソッドがコールされたかどうかのチェックの方法が分からない
 	// function test_find_after_findフックが呼ばれる() {}
 	// function test_find_after_findフックの戻り値がfindの戻り値になる() {}
-	function test_find_取得したインスタンスはid_created_at_updated_atを持っている() {
+	function test_find_DBからデータを取得して生成したインスタンスはid_created_at_updated_atを持っている() {
 		$model = Model_Test::find(1);
 
 		$this->assertTrue(isset($model->id));
@@ -198,11 +243,12 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 		$this->assertTrue(isset($model->updated_at));
 	}
 	function test_find_存在しないidを与えるとnullが返る() {
-		$model = Model_Test::find(100000000);
+		$unknown_id = 100000000;
+		$model = Model_Test::find($unknown_id);
 		$this->assertEquals($model, null);
 	}
 
-	function test_findBy_Model_Baseのインスタンスの配列が返る() {
+	function test_findBy_一致する条件があればModel_Baseのインスタンスの配列が返る() {
 		$result = Model_Test::findBy('content', 'Hoge');
 
 		$this->assertTrue(is_array($result));
@@ -237,86 +283,75 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 
 	function test_count_引数を省略するとそのテーブル全件のデータ件数が取得できる() {
 		$rows = $this->getConnection()->getRowCount('tests');
-		$this->assertEquals($rows, Model_Test::count());
+
+		$all_row_count = Model_Test::count();
+		$this->assertEquals($rows, $all_row_count);
 	}
 	function test_count_存在しない条件を与えると戻り値はゼロ() {
-		$this->assertEquals(0, Model_Test::count('id', true, array(array('id', '=', 10000))));
+		$not_exist_condition = array(array('id', '=', 10000));
+		// NOTE: false=重複行も１行ずつカウントする
+		$matched_row_count = Model_Test::count('id', false, $not_exist_condition);
+
+		$this->assertEquals(0, $matched_row_count);
 	}
 
-	function test_before_save_第一引数はクエリビルダー() {
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_save', $this->isInstanceOf('Database_Query_Builder'));
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+	function test_before_save_第一引数にクエリビルダーのインスタンスが渡される() {
+		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
+		$mock = $this->getHookFirstArgument('Model_Test', 'before_save', $expected_arg);
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->save(); } catch(Exception $e) {}
 	}
-	function test_before_insert_第一引数はクエリビルダー() {
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_insert', $this->isInstanceOf('Database_Query_Builder'));
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+	function test_before_insert_第一引数にクエリビルダーのインスタンスが渡される() {
+		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
+		$mock = $this->getHookFirstArgument('Model_Test', 'before_insert', $expected_arg);
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->insert(); } catch(Exception $e) {}
 	}
-	function test_before_update_第一引数はクエリビルダー() {
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_update', $this->isInstanceOf('Database_Query_Builder'));
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+
+	function test_before_update_第一引数にクエリビルダーのインスタンスが渡される() {
+		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
+		$mock = $this->getHookFirstArgument('Model_Test', 'before_update', $expected_arg);
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->update(); } catch(Exception $e) {}
 	}
-	function test_before_delete_第一引数はクエリビルダー() {
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_delete', $this->isInstanceOf('Database_Query_Builder'));
-		// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
+	function test_before_delete_第一引数にクエリビルダーのインスタンスが渡される() {
+		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
+		$mock = $this->getHookFirstArgument('Model_Test', 'before_delete', $expected_arg);
+
+		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 		try { $mock->delete(); } catch(Exception $e) {}
 	}
 
-	// function test_after_find_戻り値はDBから取得したデータの連想配列() {}
-
-	// function test_after_save_第一引数はboolean() {
-	// 	$mock = $this->getHookFirstArgument('Model_Test', 'after_save', $this->isType('boolean'));
-	// 	// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-	// 	try { $mock->save(); } catch(Exception $e) {}
-	// }
-	// function test_after_insert_第一引数はboolean() {
-	// 	$mock = $this->getHookFirstArgument('Model_Test', 'after_insert', $this->isType('boolean'));
-	// 	// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-	// 	try { $mock->insert(); } catch(Exception $e) {}
-	// }
-	// function test_after_update_第一引数はboolean() {
-	// 	$mock = $this->getHookFirstArgument('Model_Test', 'after_update', $this->isType('boolean'));
-	// 	// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-	// 	try { $mock->update(); } catch(Exception $e) {}
-	// }
-	// function test_after_delete_第一引数はboolean() {
-	// 	$mock = $this->getHookFirstArgument('Model_Test', 'after_delete', $this->isType('boolean'));
-	// 	// NOTE: モックで生成するとクラス名が変わるのでテーブルがないと例外を投げられる。ので握りつぶし
-	// 	try { $mock->delete(); } catch(Exception $e) {}
-	// }
-	// function test_after_validate_第一引数はboolean() {
-	// 	$mock = $this->getHookFirstArgument('Model_Test', 'after_validate', $this->isType('boolean'));
-	// 	$mock->validate();
-	// }
-
+	// FIXME: staticメソッドのコール確認の方法がわからない
 	// function test_transactionDo_トランザクションが実行されている() {}
 	// function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {}
 	// function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {}
 
-	private function getGetTableName($class_name) {
-		$ref = new ReflectionClass($class_name);
-		$_getTableName = $ref->getMethod('_getTableName');
-		$_getTableName->setAccessible(true);
-
-		return $_getTableName;
-	}
-	function test__getTableName_Model_を取り除き、クラス名を小文字かつ複数形にした文字列が返却される() {
-		$this->assertEquals('tests', $this->getGetTableName('Model_Test')->invokeArgs(null, array()));
+	// NOTE: クラス名->テーブル名の変換ルールについてはこちらを参照
+	// http://ne0.next-engine.org:10080/ld3sl/issues/6297#クラス名とテーブル名の命名規約
+	function test__getTableName_クラス名からModel_を取り除き、小文字かつ複数形にした文字列が返却される() {
+		$table_name = $this->getGetTableName('Model_Test')->invokeArgs(null, array());
+		$this->assertEquals('tests', $table_name);
 	}
 
 	function test_toArray_戻り値は連想配列() {
 		$model = new Model_Test();
 		$this->assertTrue(is_array($model->toArray()));
 	}
-	function test_toArray_ignoreされたプロパティは含まれない() {
+	function test_toArray_ignoreされたプロパティは返却されない() {
 		$model = new Model_Test();
 		$result = $model->toArray();
 		$this->assertFalse(isset($result['hoge']));
 	}
-	function test_toArray_コンストラクタで渡されてもプロパティ定義されていないプロパティが含まれない() {
-		$model = new Model_Test(array('unknown' => 1, 'not_exist' => 1));
+	function test_toArray_定義されていないプロパティは返却されない() {
+		$model = new Model_Test(array(
+			'unknown' => 1,
+			'not_exist' => 1
+		));
+
 		$result = $model->toArray();
 		$this->assertFalse(isset($result['unknown']));
 		$this->assertFalse(isset($result['not_exist']));

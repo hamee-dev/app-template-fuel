@@ -117,8 +117,8 @@ abstract class Model_Base
 			$current_sql = $query->compile();
 
 			// SQLが'INSERT'もしくは'insert'で始まっていたら、'INSERT IGNORE'に置き換える。
-			if(Str::start_with($current_sql, 'INSERT', true)) {
-				$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6));
+			if(Str::starts_with($current_sql, 'INSERT', true)) {
+				$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6), DB::INSERT);
 			}
 		}
 
@@ -411,31 +411,31 @@ abstract class Model_Base
 	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
 	 * @return void
 	 */
-	protected function before_save(\Database_Query_Builder &$query) {}
+	protected function before_save(\Database_Query &$query) {}
 
 	/**
 	 * 挿入処理の直前に実行できるフック
 	 * insertメソッドでコールされる。
-	 * @param  \Database_Query_Builder_Insert $query クエリビルダのインスタンス
+	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_insert(\Database_Query_Builder &$query) {}
+	protected function before_insert(\Database_Query &$query) {}
 
 	/**
 	 * 更新処理の直前に実行できるフック
 	 * updateメソッドでコールされる。
-	 * @param  \Database_Query_Builder_Update $query クエリビルダのインスタンス
+	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_update(\Database_Query_Builder &$query) {}
+	protected function before_update(\Database_Query &$query) {}
 
 	/**
 	 * 削除処理の直前に実行できるフック
 	 * deleteメソッドでコールされる。
-	 * @param  \Database_Query_Builder_Delete $query クエリビルダのインスタンス
+	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_delete(\Database_Query_Builder &$query) {}
+	protected function before_delete(\Database_Query &$query) {}
 
 	/**
 	 * バリデーション処理の直前に実行できるフック
