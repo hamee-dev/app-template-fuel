@@ -8,8 +8,6 @@ class Model_Test extends Model_Base {
 	public $content = null;
 }
 
-define('HOGE', 1);
-
 /**
  * Model_Baseのテスト
  */
