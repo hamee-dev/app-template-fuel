@@ -4,16 +4,19 @@ abstract class Controller_Base extends Controller_Template
 {
 	/**
 	 * アクセスされたユーザの言語ロケールを取得する
-	 * 要求度付きのロケールでも動作します。
-	 * ### sample
-	 * en => en
-	 * ja;q=0.6 => ja
+	 * 複数指定されている場合は、もっとも先頭に指定されている言語を返却します。  
+	 * 先頭の２文字だけを見るので、３文字以上の言語略称が現れた場合にはバグります。直して下さい。
+	 * 
+	 * ### example
+	 * - 'en' => 'en'
+	 * - 'ja;q=0.6' => 'ja'
+	 * - 'xxx' => 'xx'
+	 * 
 	 * @return string
 	 */
 	private static function getLocale() {
 		$locales = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-		$locale = explode(';q=', $locales[0]);	// 要求度が付与されている場合に削除する
-		return $locale[0];
+		return Str::sub(trim($locales[0]), 0, 2);
 	}
 
 	/**
