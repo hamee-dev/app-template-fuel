@@ -48,9 +48,6 @@ class Controller_Auth extends \Controller {
 		$company_info = self::$client->apiExecute('/api_v1_login_company/info');
 		$company_info = $company_info['data'][0];
 
-		// var_dump($company_info);
-		// exit();
-
 		// 2-1. ログインされた企業がDBに存在しなければ、企業情報をDBに格納
 		$company = new \Model_Company();
 
