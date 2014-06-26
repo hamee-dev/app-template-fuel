@@ -141,7 +141,8 @@ abstract class Model_Base
 		$this->after_save($result);
 
 		// NOTE: 挿入に失敗していたら、idが無いので設定のしようがない
-		if($result) {
+		// NOTE: INSERT IGNOREを使用すると"変化行数がないけど成功"が起こりうるので作用した行数もチェック
+		if($result && $ret[1] > 0) {
 			$this->id = $ret[0];
 		}
 
