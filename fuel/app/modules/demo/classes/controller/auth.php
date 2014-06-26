@@ -60,6 +60,13 @@ class Controller_Auth extends \Controller {
 		$company->main_function_id = $company_info['company_id'];
 		$company->save(true);
 
+		// NOTE: 企業データが既に挿入済みで挿入に失敗しても、
+		//       $companyのidがないとfキー制約で$userが保存できなくなるので無理やり復帰させる
+		if(is_null($company->id)) {
+			$company = \Model_Company::findBy('main_function_id', $company->main_function_id);
+			$company = $company[0];
+		}
+
 		// 2-2. ログインされたユーザがDBに存在しなければ、ユーザ情報をDBに格納
 		$user = new \Model_User();
 
