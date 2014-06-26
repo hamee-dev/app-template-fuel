@@ -31,7 +31,7 @@ class Controller_Auth extends \Controller {
 	 */
 	public function action_logout()
 	{
-		Session::delete('account');
+		\Session::delete('account');
 		// TODO: どこかにリダイレクト
 	}
 
