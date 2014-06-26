@@ -24,12 +24,6 @@ class Client extends \neApiClient
 	protected static $_defaults = array();
 
 	/**
-	* 設定値を格納する
-	* @var array
-	*/
-	protected $config = array();
-
-	/**
 	 * 設定をロードし格納しておく
 	 */
 	public static function _init()
@@ -40,12 +34,13 @@ class Client extends \neApiClient
 	/**
 	 * FuelPHP式（ファクトリメソッド）のコンストラクタ
 	 *
-	 * @param  array $config Config array
-	 * @return Nextengine
+	 * @param  Model_User $user   ユーザのインスタンス
+	 * @param  array      $config 設定値（この値が優先される）
+	 * @return Nextengine\Api\Client
 	 */
-	public static function forge($config = array())
+	public static function forge(\Model_User $user, $config = array())
 	{
-		$config = \Arr::merge(static::$_defaults, \Config::get('nextengine', array()), $config);
+		$config = \Arr::merge(static::$_defaults, $config);
 
 		$class = new static($config);
 
@@ -54,17 +49,21 @@ class Client extends \neApiClient
 
 	/**
 	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
-	 * @param array $config driver config
+	 * @param  Model_User $user   ユーザのインスタンス
+	 * @param  array      $config 設定値（この値が優先される）
 	 */
-	public function __construct(array $config = array())
+	public function __construct(\Model_User $user, array $config = array())
 	{
-		$config = \Arr::merge($config, self::$_defaults);
+		$config = \Arr::merge(self::$_defaults, $config);
 
-		$this->_client_id     = $config['client_id'];
-		$this->_client_secret = $config['client_secret'];
-		$this->_redirect_uri  = $config['redirect_uri'];
+		$this->user = $user;
 
-		parent::__construct($this->_client_id, $this->_client_secret, $this->_redirect_uri);
+		parent::__construct(
+			$config['client_id'],
+			$config['client_secret'],
+			$config['redirect_uri'],
+			$user->access_token,
+			$user->refresh_token);
 	}
 
 	/**
@@ -77,11 +76,19 @@ class Client extends \neApiClient
 	 * @override
 	 */
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
+		$current_access_token = $this->_access_token;
+
 		$response = parent::apiExecute($path, $api_params, $redirect_uri);
 
 		// TODO: resultがsuccessじゃなかったらエラーコードによって例外を投げる
 		if($response['result'] !== self::RESULT_SUCCESS) {
 			$this->failover($response['code'], $response['message']);
+		}
+
+		if($current_access_token !== $this->_access_token) {
+			$this->user->access_token  = $this->_access_token;
+			$this->user->refresh_token = $this->_refresh_token;
+			$this->user->save();
 		}
 
 		return $response;
