@@ -2,7 +2,7 @@
 
 namespace Nextengine\Api;
 
-class Client_Bach extends Client
+class Client_Router extends Client
 {
 	/**
 	 * 例外の振り分けを行う
