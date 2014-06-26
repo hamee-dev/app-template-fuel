@@ -2,7 +2,7 @@
 
 namespace Nextengine\Api;
 
-class Router extends Client
+class Client_Bach extends Client
 {
 	/**
 	 * 例外の振り分けを行う
@@ -14,7 +14,6 @@ class Router extends Client
 		} catch(NextengineApiException $e) {
 			// NOTE: redirectはexitを打つのでbreakを書かないでも動作するが、
 			//       redirectじゃない処理に変えた時に意図しないバグを防ぐためbreakを入れている。
-			var_dump($e->getCode());
 			switch($e->getCode()) {
 				// メンテナンス中 => メンテナンス中です画面へリダイレクト
 				case '002007':	// 現在ネクストエンジンサーバーがメンテナンス中の為、再度時間を置いてからアクセスして下さい。
