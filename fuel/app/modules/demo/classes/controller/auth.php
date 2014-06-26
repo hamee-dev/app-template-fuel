@@ -10,7 +10,12 @@ class Controller_Auth extends \Controller {
 
 	public static function _init()
 	{
-		self::$client = new \Nextengine\Api\Client();
+		$user = \Session::get('account.user');
+		if(is_null($user)) {
+			$user = new \Model_User();
+		}
+
+		self::$client = new \Nextengine\Api\Client($user);
 	}
 
 	/**
