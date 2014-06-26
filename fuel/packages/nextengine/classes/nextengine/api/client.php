@@ -4,8 +4,12 @@ namespace Nextengine\Api;
 
 require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 
-class NextengineApiException extends \FuelException {}
-// class NextengineApi**Exception extends NextengineApiException {}
+class NextengineApiException extends \FuelException {
+	public function __construct($message, $code) {
+		$this->code = $code;
+		parent::__construct($message, 0);
+	}
+}
 
 class Client extends \neApiClient
 {
@@ -14,19 +18,19 @@ class Client extends \neApiClient
 	const RESULT_REDIRECT = 'redirect';
 
 	/**
-	 * Default config
+	 * デフォルトの設定値
 	 * @var array
 	 */
 	protected static $_defaults = array();
 
 	/**
-	* Driver config
+	* 設定値を格納する
 	* @var array
 	*/
 	protected $config = array();
 
 	/**
-	 * Init
+	 * 設定をロードし格納しておく
 	 */
 	public static function _init()
 	{
@@ -34,7 +38,7 @@ class Client extends \neApiClient
 	}
 
 	/**
-	 * Nextengine driver forge.
+	 * FuelPHP式（ファクトリメソッド）のコンストラクタ
 	 *
 	 * @param  array $config Config array
 	 * @return Nextengine
@@ -49,10 +53,9 @@ class Client extends \neApiClient
 	}
 
 	/**
-	* Driver constructor
-	*
-	* @param array $config driver config
-	*/
+	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
+	 * @param array $config driver config
+	 */
 	public function __construct(array $config = array())
 	{
 		$config = \Arr::merge($config, self::$_defaults);
@@ -64,6 +67,15 @@ class Client extends \neApiClient
 		parent::__construct($this->_client_id, $this->_client_secret, $this->_redirect_uri);
 	}
 
+	/**
+	 * ネクストエンジンAPIを叩く
+	 * 
+	 * ### 拡張点
+	 * 親クラスから拡張した処理は、
+	 * レスポンスに含まれるresultフィールドの値がsuccessでないなら、例外を投げるという処理を追加した
+	 *
+	 * @override
+	 */
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
 		$response = parent::apiExecute($path, $api_params, $redirect_uri);
 
@@ -75,12 +87,23 @@ class Client extends \neApiClient
 		return $response;
 	}
 
-	public function neLogin($redirect_uri = NULL) {
-		return parent::neLogin($redirect_uri);
-	}
+	/**
+	 * ネクストエンジンAPIにログインを行う
+	 * 
+	 * ### 拡張点
+	 * 今のところ無いのでコメントアウト
+	 * 
+	 * @override
+	 */
+	// public function neLogin($redirect_uri = NULL) {
+	// 	return parent::neLogin($redirect_uri);
+	// }
 
+	/**
+	 * ネクストエンジンAPIからエラーが帰っていた場合の処理を行う
+	 */
 	protected function failover($code, $message) {
 		// TODO: ログの出力/メール送信
-		throw new NextengineApiException($code, $message);
+		throw new NextengineApiException($message, $code);
 	}
 }
