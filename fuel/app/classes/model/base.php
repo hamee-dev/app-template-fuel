@@ -133,18 +133,18 @@ abstract class Model_Base
 		$this->before_save($query);
 		$this->before_insert($query);
 
-		// $retが配列なら成功[(string)挿入されたid, (int)作用行数]、NULLなら失敗
 		$ret = $this->executeInTransaction($query);
-		$result = is_array($ret);
+
+		$result = false;
+		// NOTE: 挿入に失敗していたら、idが無いので設定のしようがない
+		// NOTE: INSERT IGNOREを使用すると"変化行数がないけど成功"が起こりうるので作用した行数もチェック
+		if($ret[1] > 0) {
+			$this->id = $ret[0];
+			$result = true;
+		}
 
 		$this->after_insert($result);
 		$this->after_save($result);
-
-		// NOTE: 挿入に失敗していたら、idが無いので設定のしようがない
-		// NOTE: INSERT IGNOREを使用すると"変化行数がないけど成功"が起こりうるので作用した行数もチェック
-		if($result && $ret[1] > 0) {
-			$this->id = $ret[0];
-		}
 
 		return $result;
 	}
