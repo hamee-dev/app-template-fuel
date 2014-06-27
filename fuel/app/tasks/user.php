@@ -58,7 +58,9 @@ class User
 	 */
 	private function _refresh(\Model_User $user)
 	{
-		$client = new \Nextengine\Api\Client_Batch($user);
+		$client = new \Nextengine\Api\Client_Batch();
+		$client->setUser($user);
+
 		$client->apiExecute('/api_v1_login_user/info');
 	}
 }
