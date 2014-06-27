@@ -1,9 +1,6 @@
 <?php
 
 class Controller_Auth extends \Controller {
-	const CLIENT_ID = '2zG7d5MjXPh4m8';
-	const CLIENT_SECRET = 'FTNubmlpyAgE5e3BnqWt6IHJ18voxVkMS9Yh4Zjc';
-
 	private static $client;
 
 	public static function _init()
