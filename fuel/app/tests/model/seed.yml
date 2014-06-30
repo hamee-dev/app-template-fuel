@@ -2,4 +2,19 @@ tests:
     -
         id: 1
         content: 'Hoge'
-   
+
+companies:
+    -
+        id: 1
+        main_function_id: 46cae77604498786631240730f6ce4b8b2bbd6bb5dbf653d7bf039dfdbc5c7971b440f0523be778687950caacbe72765b0de9fb526d4dc71fd617c4fcb8cf742
+        platform_id: 5c023a1e9831b3bd409c194251908431a399888d15950066dd8c5baab07c9b187620171d179f7f6b376a2e57f41a925609ee40328e7449f1c9689f98b09c659e
+
+users:
+    -
+        id: 1
+        company_id: 1
+        uid: e6ee55c1d0abe34179ef2ff2f820d9c691151463c3c41254dc4fb41f071a51dd32b7806cd4d004e29f8b4a6038ec32a1108adc29fa5573fbfc5a19da6e8062fe
+        next_engine_id: 378fc6b68130f0090644b837ab0ae295625c17a5a4a8994f5d14f9fd645f21528e170bff4d517eec23d515dcc61e9c85dcfce7145016a82b69714422910b80ce
+        email: inoue.shingo+stagingtest@hamee.co.jp
+        access_token: 2dc4220ef9ed99002d574549a099b319127999689ba8cbe4a0ab1c228392511ef7c6a89bfdb06d25b56c19831d803e27882e91ae087e4ccbda8be82cb3aee45e
+        refresh_token: 56817f0255f053af46823c8f203fe3c7da32dca52e09ecc0ab98bcc520c1e5225b580a9ff6e3dc1683f2a37d785a073d769e42d3e96f90fd8b52890e9a746121
