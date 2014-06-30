@@ -7,6 +7,14 @@ require_once __DIR__.'/base.php';
  */
 class Test_Controller_Auth extends Test_Controller_Base
 {
+	// DBを初期化（テストのはじめに）
+	public static function setUpBeforeClass() {
+		Test_Model_Base::setUpBeforeClass();
+	}
+	public static function tearDownAfterClass() {
+		Test_Model_Base::tearDownAfterClass();
+	}
+
 	private function getClient() {
 		$ref = new ReflectionClass('Controller_Auth');
 		$client = $ref->getProperty('client');

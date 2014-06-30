@@ -3,9 +3,9 @@
 /**
  * Nextengine_Api_Clientのテスト
  */
-class Test_Nextengine_Api_Client extends PHPUnit_Framework_TestCase
+class Test_Nextengine_Api_Client extends Test_Model_Base
 {
-	private function getMethod($class, $method) {
+	protected function getMethod($class, $method) {
 		$ref = new ReflectionClass($class);
 
 		$method = $ref->getMethod($method);
@@ -13,7 +13,7 @@ class Test_Nextengine_Api_Client extends PHPUnit_Framework_TestCase
 
 		return $method;
 	}
-	private function getProperty($class, $prop) {
+	protected function getProperty($class, $prop) {
 		$ref = new ReflectionClass($class);
 
 		$prop = $ref->getProperty($prop);

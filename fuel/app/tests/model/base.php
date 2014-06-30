@@ -15,6 +15,7 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 {
 	private static $pdo;
 	private static $conn = null;
+	private static $DB_NAME = null;
 
 	/**
 	 * フィクスチャの定義
@@ -27,7 +28,7 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 
 		// DSNからデータベース名を取得
 		preg_match('/dbname=(\w+)$/', $config['dsn'], $matched);
-		define('DB_NAME', $matched[1]);
+		self::$DB_NAME = $matched[1];
 
 		self::$pdo = new PDO($config['dsn'], $config['username'], $config['password']);
 	}
@@ -41,7 +42,7 @@ class Test_Model_Base extends PHPUnit_Extensions_Database_TestCase
 	public function getConnection() {
 		// 接続を使いまわす
 		if(is_null(self::$conn)) {
-			self::$conn = $this->createDefaultDBConnection(self::$pdo, DB_NAME);
+			self::$conn = $this->createDefaultDBConnection(self::$pdo, self::$DB_NAME);
 		}
 		return self::$conn;
 	}
