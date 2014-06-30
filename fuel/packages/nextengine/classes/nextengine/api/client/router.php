@@ -2,12 +2,16 @@
 
 namespace Nextengine\Api;
 
+/**
+ * ネクストエンジンAPIクライアントのコントローラ用の継承クラス。
+ * NOTE: failoverメソッドの例外の処理によってリダイレクトを行うので、ControllerではなくRouterという名前を採用。
+ */
 class Client_Router extends Client
 {
 	/**
 	 * ユーザのuidを用いて認証を行う。
 	 * DB < APIの順でコストが高いので、まずDBを見てから、仕方ない場合のみAPIを叩く形にしている。
-	 * FIXME: 戻り値で配列を使用しているのでややオレオレ仕様になっている。
+	 * FIXME: 戻り値で配列を使用しているので、ややオレオレ仕様になっている。
 	 * 
 	 * ```php
 	 * list($company, $user) = $client->authenticate($uid);
@@ -32,16 +36,15 @@ class Client_Router extends Client
 		}
 
 		$this->setUser($user);
-
-		// apiを1度叩かないと最新のアクセストークンが取得できないので最低１回は叩かないといけない
-		if(count($users) > 0) {
-			$this->apiExecute('/api_v1_login_user/info');
-		}
 		return array($company, $user);
 	}
 
 	/**
 	 * 例外の振り分けを行う
+	 * 
+	 * ### 親クラスからの拡張点
+	 * 親クラスが例外を投げるだけなので、そいつをキャッチして例外コードに沿った具体的なアクションを追加
+	 *
 	 */
 	protected function failover($code, $message) {
 		// 親クラスが例外を投げてくれるのでその詳細を解析する
@@ -66,7 +69,7 @@ class Client_Router extends Client
 					\Response::redirect('/error/congestion');
 					break;
 
-				// 支払い灯の理由で利用停止、システムエラー => 営業に問い合わせてねエラー画面へリダイレクト
+				// 支払い等の理由で利用停止、システムエラー => 営業に問い合わせてねエラー画面へリダイレクト
 				case '001007':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '002003':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '003003':	// [xxxxx]様のメイン機能が、利用停止です。
@@ -80,12 +83,10 @@ class Client_Router extends Client
 		}
 	}
 
-	// APIから企業情報を取得し、
-	// INSERT IGNORE
 	/**
 	 * APIから情報を取得し企業データをDBに挿入する
-	 * 既にDBに情報が存在している場合はUPDATEがかかる。
-	 * FIXME: Model_BaseでINSERTorUPDATEを未実装のため、
+	 * 既にDBに企業データが存在している場合は、それを取得して返す。
+	 * FIXME: INSERTorUPDATEは未実装のため、
 	 *        INSERT or UPDATEではなく、INSERT IGNOREとSELECT + UPDATEを利用している。とても冗長。
 	 * @return Model_Company 挿入(orDBから取得)したインスタンス
 	 */
@@ -95,8 +96,8 @@ class Client_Router extends Client
 
 		// NOTE: http://ne0.next-engine.org:10080/ld3sl/issues/6329
 		//       SELECTを打ってからINSERTをするよりも、INSERT IGNOREを使用したほうが早い
-		//       毎回必ずSELECTが走るよりも、挿入に失敗したらSELECTが走る方がコストが安くなると判断したため
-		//       まず一度挿入を試みて、失敗したら復帰処理としてUPDATEをかけている。
+		//       毎回必ずSELECTが走るよりも、挿入に失敗したらSELECT+UPDATEが走る方がコストが安くなると判断したため
+		//       まず一度挿入を試みて、挿入に失敗したら復帰処理としてSELECTをかけている。
 		$company = new \Model_Company();
 		$company->platform_id      = $company_info['company_ne_id'];
 		$company->main_function_id = $company_info['company_id'];
@@ -113,10 +114,10 @@ class Client_Router extends Client
 
 	/**
 	 * APIから情報を取得しユーザデータをDBに挿入する
-	 * 既にDBに情報が存在している場合はUPDATEがかかる。
-	 * FIXME: Model_BaseでINSERTorUPDATEを未実装のため、
+	 * 既にDBにユーザデータが存在している場合は、アクセストークンとリフレッシュトークンのUPDATEをかける。
+	 * FIXME: INSERTorUPDATEは未実装のため、
 	 *        INSERT or UPDATEではなく、INSERT IGNOREとSELECT + UPDATEを利用している。とても冗長。
-	 * @param  int $company_id
+	 * @param  int $company_id 所属している企業ID
 	 * @return Model_User 挿入(orDBから取得)したインスタンス
 	 */
 	private function _createUser($company_id) {
@@ -137,7 +138,8 @@ class Client_Router extends Client
 		$user->created_at     = \DB::expr('NOW()');
 
 		// NOTE: ユーザデータが既に挿入済みのために挿入が発生しなくても、
-		//       $userとDBの値が同じになっていないと、APIを叩く->ユーザモデルを更新の方式が取れないので、無理やり復帰させる
+		//       $userとDBの値が同じになっていないと、APIを叩く->ユーザモデルを更新の方式が取れないので、無理やり復帰させなければならない
+		//       なのでSELECTで存在するユーザを取ってきて、アクセストークンを最新の状態に更新する。
 		if(!$user->save(true)) {
 			$users = \Model_User::findBy('uid', $user_info['uid']);
 			$user = $users[0];
