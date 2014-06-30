@@ -7,26 +7,89 @@ require_once __DIR__.'/base.php';
  */
 class Test_Controller_Auth extends Test_Controller_Base
 {
-	function test__init_を呼ぶとclientにはクライアントのインスタンスがセットされている() {
+	private function getClient() {
 		$ref = new ReflectionClass('Controller_Auth');
 		$client = $ref->getProperty('client');
 		$client->setAccessible(true);
 
+		return $client;
+	}
+
+	function test__init_を呼ぶとclientにはクライアントのインスタンスがセットされている() {
+		$client = $this->getClient();
 		$this->assertInstanceOf('\NextEngine\Api\Client', $client->getValue());
 	}
-	// function test__init_() {}
-	// function test__init_() {}
 
-	function test_action_login_() {}
-	// function test_action_login_() {}
-	// function test_action_login_() {}
+	function test_action_login_クライアントのneLoginがコールされる() {
+		$mock = $this->getMock('\NextEngine\Api\Client_Router', array('neLogin'));
+		$mock->expects($this->once())
+				->method('neLogin');
 
-	function test_action_logout_() {}
-	// function test_action_logout_() {}
-	// function test_action_logout_() {}
+		$client = $this->getClient();
+		$client->setValue($mock);
 
-	function test_action_callback_() {}
-	// function test_action_callback_() {}
-	// function test_action_callback_() {}
+		$controller = new Controller_Auth(Request::forge());
+		$controller->action_login();
+	}
+
+	function test_action_logout_セッションが全て破棄される() {
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		$company_key = Config::get('session.keys.ACCOUNT_COMPANY');
+		$controller = new Controller_Auth(Request::forge());
+
+		Session::set($user_key, 'aaa');
+		Session::set($company_key, 'xxx');
+
+		$controller->action_logout();
+
+		$this->assertEquals(null, Session::get($user_key));
+		$this->assertEquals(null, Session::get($company_key));
+	}
+
+	private function getAuthenticateChecker($uid) {
+		$mock = $this->getMock('\NextEngine\Api\Client_Router', array('authenticate'));
+		$mock->expects($this->once())
+				->method('authenticate')
+				->with($this->equalTo($uid));
+
+		return $mock;
+	}
+
+	function test_action_callback_SESSIONがなく、GETのuidとstateがあるならGETを使って認証処理を行う() {
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		Session::set($user_key, null);
+		$_GET['uid']	= 'get-uid';
+		$_GET['state']	= 'get-state';
+
+		$mock = $this->getAuthenticateChecker(Input::get('uid'));
+		$client = $this->getClient();
+		$client->setValue($mock);
+
+		$controller = new Controller_Auth(Request::forge());
+
+		// NOTE: 既にテスト結果が出力されてしまっているのでリダイレクトしようとするとエラーになる
+		//       ダミー情報をセットしているので認証するためにリダイレクトがかかる。
+		try { $controller->action_callback(); } catch(\Exception $e) {}
+	}
+	function test_action_callback_SESSIONがある、GETはない場合はセッションを用い認証を行う() {
+		$user = new Model_User(array(
+			'uid' => 'hogehoge'
+		));
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		Session::set($user_key, $user);
+
+		$_GET['uid']	= null;
+		$_GET['state']	= null;
+
+		$mock = $this->getAuthenticateChecker($user->uid);
+		$client = $this->getClient();
+		$client->setValue($mock);
+
+		$controller = new Controller_Auth(Request::forge());
+
+		// NOTE: 既にテスト結果が出力されてしまっているのでリダイレクトしようとするとエラーになる
+		//       ダミー情報をセットしているので認証するためにリダイレクトがかかる。
+		try { $controller->action_callback(); } catch(\Exception $e) {}
+	}
 
 }

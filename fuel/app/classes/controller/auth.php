@@ -24,7 +24,7 @@ class Controller_Auth extends Controller_Base {
 	 */
 	public function action_logout()
 	{
-		Session::delete('account');
+		Session::destroy();
 		// TODO: どこかにリダイレクト
 	}
 
@@ -39,7 +39,7 @@ class Controller_Auth extends Controller_Base {
 		$get_state    = Input::get('state');
 
 		// セッションもURLにも何もない = 通常操作では起こりえない非正規ルートなので再認証させる
-		if(is_null($get_uid) && is_null($get_state)) {
+		if(is_null($get_uid) && is_null($get_state) && is_null($session_user)) {
 			Response::redirect('/demo/auth/login');
 		}
 
@@ -49,7 +49,7 @@ class Controller_Auth extends Controller_Base {
 			list($company, $user) = self::$client->authenticate($session_user->uid);
 		} else {
 			// セッションがなくURLにuidとstateが渡っていたら、URLのuidを使って認証
-			// NOTE: GETがない場合は弾いているのである前提でOK
+			// NOTE: GETがない場合は弾いているので、GETパラメータがある前提でOK
 			list($company, $user) = self::$client->authenticate($get_uid);
 		}
 
@@ -59,6 +59,7 @@ class Controller_Auth extends Controller_Base {
 		Session::set($company_key, $company);
 		Session::set($user_key, $user);
 
+		// FIXME: 簡素なHTMLとはいえ、ビュー側でやるべきこと
 		echo "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
 	}
 }
