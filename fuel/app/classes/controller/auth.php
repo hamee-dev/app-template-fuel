@@ -25,7 +25,7 @@ class Controller_Auth extends Controller_Base {
 	public function action_logout()
 	{
 		Session::destroy();
-		// TODO: どこかにリダイレクト
+		Response::redirect('/');
 	}
 
 	/**
@@ -60,6 +60,7 @@ class Controller_Auth extends Controller_Base {
 		Session::set($user_key, $user);
 
 		// FIXME: 簡素なHTMLとはいえ、ビュー側でやるべきこと
-		echo "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
+		$this->template->title = 'Authenticate complete!!';
+		$this->template->content = "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
 	}
 }
