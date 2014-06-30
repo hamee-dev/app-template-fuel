@@ -298,7 +298,9 @@ return array(
 		 * add it like 'session' => 'auth'.
 		 * If you don't want the config in a group use null as groupname.
 		 */
-		// 'config'  => array(),
+		'config'  => array(
+			'session',
+		),
 
 		/**
 		 * Language files to autoload
