@@ -39,16 +39,14 @@ class Client extends \neApiClient
 
 	/**
 	 * FuelPHP式（ファクトリメソッド）のコンストラクタ
+	 * 内部は単にコンストラクタを呼ぶだけ
 	 *
 	 * @param  array      $config 設定値（この値が優先される）
 	 * @return Nextengine\Api\Client
 	 */
 	public static function forge(array $config = array())
 	{
-		$config = \Arr::merge(static::$_defaults, $config);
-
 		$class = new static($config);
-
 		return $class;
 	}
 
@@ -81,7 +79,7 @@ class Client extends \neApiClient
 		}
 
 		// まだAPIを叩いていない状態で、アクセストークンがあるユーザが渡されたら、クライアントのプロパティを更新
-		if(!is_null($user->access_token)) {
+		if(is_null($this->_access_token) && !is_null($user->access_token)) {
 			$this->_access_token = $user->access_token;
 			$this->_refresh_token = $user->refresh_token;
 		}
@@ -114,7 +112,8 @@ class Client extends \neApiClient
 			$this->user->refresh_token = $this->_refresh_token;
 			$this->user->save();
 
-			\Session::set('account.user', $this->user);
+			$user_key = Config::get('session.keys.ACCOUNT_USER');
+			Session::set($user_key, $this->user);
 		}
 
 		return $response;
