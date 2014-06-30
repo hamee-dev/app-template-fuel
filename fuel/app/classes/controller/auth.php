@@ -52,8 +52,10 @@ class Controller_Auth extends \Controller {
 		}
 
 		// セッションにログインユーザの情報をセット
-		Session::set('account.company', $company);
-		Session::set('account.user', $user);
+		$company_key = Config::get('session.keys.ACCOUNT_COMPANY');
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		Session::set($company_key, $company);
+		Session::set($user_key, $user);
 
 		echo "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
 	}

@@ -14,7 +14,9 @@ class Test_Controller_Neapi extends Test_Controller_Base
 			'id'  => 20,
 			'uid' => '71c1cc54f91641828805369f1948d22d8389cfefc6ca2661662aa4b5c8f15a61132dddd97710433b13ed9be9656630f040a5e9782f4847471031ecc02cb9d628'
 		);
-		Session::set('account.user', $user);
+
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		Session::set($user_key, $user);
 	}
 
 	function test_init_を呼ぶとclientにはクライアントのインスタンスがセットされている() {

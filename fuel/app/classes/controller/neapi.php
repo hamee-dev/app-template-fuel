@@ -21,7 +21,9 @@ abstract class Controller_Neapi extends Controller_Base {
 	public static function _init()
 	{
 		parent::_init();
-		$session_user = \Session::get('account.user');
+
+		$user_key = Config::get('session.keys.ACCOUNT_USER');
+		$session_user = \Session::get($user_key);
 
 		// セッション切れならログイン処理へリダイレクト
 		if(is_null($session_user)) {
