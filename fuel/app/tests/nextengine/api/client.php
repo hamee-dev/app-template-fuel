@@ -52,7 +52,7 @@ class Test_Nextengine_Api_Client extends PHPUnit_Framework_TestCase
 		$this->assertEquals('ccc', $_redirect_uri->getValue($client));
 	}
 
-	function test_setUser_クライアントのアクセストークンと渡したユーザのアクセストークンが違ったら、クライアント側のアクセストークンで上書きする() {
+	function test_setUser_クライアントのアクセストークンと渡したユーザのアクセストークンが違ったら、クライアント側のアクセストークンで上書きされる() {
 		$mockUser = $this->getMock('Model_User', array('save'));
 		$mockUser->expects($this->once())
 				->method('save');
@@ -65,7 +65,7 @@ class Test_Nextengine_Api_Client extends PHPUnit_Framework_TestCase
 		$this->assertEquals($client->_access_token, $mockUser->access_token);
 		$this->assertEquals($client->_refresh_token, $mockUser->refresh_token);
 	}
-	function test_setUser_まだAPIが呼ばれていない状態でアクセストークンのあるユーザが渡されたらクワイアンと側のアクセストークンを上書き() {
+	function test_setUser_まだAPIが呼ばれていない状態でアクセストークンのあるユーザが渡されたら、ユーザモデル側のアクセストークンで上書きされる() {
 		$mockUser = $this->getMock('Model_User', array('save'));
 		$mockUser->expects($this->never())
 				->method('save');
