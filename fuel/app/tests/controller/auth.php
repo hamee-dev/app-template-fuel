@@ -58,8 +58,9 @@ class Test_Controller_Auth extends Test_Controller_Base
 	function test_action_callback_SESSIONがなく、GETのuidとstateがあるならGETを使って認証処理を行う() {
 		$user_key = Config::get('session.keys.ACCOUNT_USER');
 		Session::set($user_key, null);
-		$_GET['uid']	= 'get-uid';
-		$_GET['state']	= 'get-state';
+		// 単にGETに値を入れたいだけで、任意の文字列を入れている。
+		$_GET['uid']	= 'aaaaaa';
+		$_GET['state']	= 'xxxxxx';
 
 		$mock = $this->getAuthenticateChecker(Input::get('uid'));
 		$client = $this->getClient();
@@ -68,7 +69,7 @@ class Test_Controller_Auth extends Test_Controller_Base
 		$controller = new Controller_Auth(Request::forge());
 
 		// NOTE: 既にテスト結果が出力されてしまっているのでリダイレクトしようとするとエラーになる
-		//       ダミー情報をセットしているので認証するためにリダイレクトがかかる。
+		//       ダミー情報をセットしているので認証するため、リダイレクトがかかる。ので発生する例外を無視する。
 		try { $controller->action_callback(); } catch(\Exception $e) {}
 	}
 	function test_action_callback_SESSIONがある、GETはない場合はセッションを用い認証を行う() {
