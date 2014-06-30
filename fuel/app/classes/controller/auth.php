@@ -1,10 +1,12 @@
 <?php
 
-class Controller_Auth extends \Controller {
+class Controller_Auth extends Controller_Base {
 	private static $client;
 
 	public static function _init()
 	{
+		parent::_init();
+
 		// NOTE: 認証画面ではコンストラクタに何も渡せない（login時には何も渡せるものがないので、ナシで統一）
 		self::$client = new Nextengine\Api\Client_Router();
 	}
