@@ -19,7 +19,7 @@ class Client_Router extends Client
 	public function authenticate($uid) {
 		// APIを１回は呼ばないといけない
 		$company = $this->_createCompany();
-		$users = \Model_User::findBy('company_id', $company->id);
+		$users = \Model_User::findBy('uid', $this->_uid);
 
 		// uidに対応するユーザがいる場合、そのまま利用する
 		if(count($users) > 0) {
