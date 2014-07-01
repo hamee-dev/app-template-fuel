@@ -5,26 +5,6 @@ namespace Nextengine\Api;
 require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 
 /**
- * ネクストエンジンAPIからのレスポンスによって発生する例外クラス
- * 発生する例外やその処理については継承クラスとドキュメントを参照。
- * ドキュメント：http://api.next-e.jp/message.php
- * @see Nextengine\Api\Client_Router
- * @see Nextengine\Api\Client_Batch
- */
-class NextengineApiException extends \FuelException {
-	/**
-	 * @param string $message エラーメッセージ(APIからのエラーメッセージをそのまま投げる)
-	 * @param string $code    エラーコード(APIからのエラーコードをそのまま投げる)
-	 */
-	public function __construct($message, $code) {
-		// NOTE: 先にcodeプロパティを定義してしまえば、
-		//       親クラスのコンストラクタでcodeプロパティが上書きされることはない
-		$this->code = $code;
-		parent::__construct($message);
-	}
-}
-
-/**
  * ネクストエンジンAPIクライアント
  * 
  * 例外による処理の振り分けを実装しているのは継承クラスなので、そちらを参照。
@@ -89,6 +69,7 @@ class Client extends \neApiClient
 	 * レスポンスに含まれるresultフィールドの値がsuccessでないなら、例外を投げるという処理を追加した
 	 *
 	 * @throws NextengineApiException
+	 * @return mixed [APIマニュアルよんでね]
 	 */
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
 		$before_exec_access_token = $this->_access_token;
@@ -138,7 +119,7 @@ class Client extends \neApiClient
 	}
 
 	/**
-	 * ネクストエンジンAPIからエラーが帰っていた場合の処理を行う
+	 * ネクストエンジンAPIからエラーが返っていた場合の処理を行う
 	 * @param  string $code    NextengineApiExceptionに渡すエラーコード
 	 * @param  string $message NextengineApiExceptionに渡すエラーメッセージ
 	 * @return void
@@ -161,8 +142,7 @@ class Client extends \neApiClient
 				case '001007':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '002003':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '003003':	// [xxxxx]様のメイン機能が、利用停止です。
-				case '999999':	// APIサーバーのシステムエラーが発生しました。
-					$this->reportToDeveloper($code, $message);
+					$this->reportToSales($code, $message);
 					break;
 			}
 
