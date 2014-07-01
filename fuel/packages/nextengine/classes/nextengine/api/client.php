@@ -145,7 +145,83 @@ class Client extends \neApiClient
 	 * @throws NextengineApiException
 	 */
 	protected function failover($code, $message) {
-		// TODO: ログの出力/メール送信
-		throw new NextengineApiException($message, $code);
+		// NOTE: ログにログレベルERRORで書き込む
+		$log = '['.$code.']'.$message;
+		\Log::error($log);
+
+		// 開発者にメール送信
+		$this->reportToDeveloper($code, $message);
+
+		// 受け取ったコード、メッセージを例外としてスローする
+		try {
+			throw new NextengineApiException($message, $code);
+		} catch(NextengineApiException $e) {
+			switch($e->getCode()) {
+				// 支払い等の理由で利用停止、システムエラー => 営業に問い合わせてねエラー画面へリダイレクト
+				case '001007':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
+				case '002003':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
+				case '003003':	// [xxxxx]様のメイン機能が、利用停止です。
+				case '999999':	// APIサーバーのシステムエラーが発生しました。
+					$this->reportToDeveloper($code, $message);
+					break;
+			}
+
+			// NOTE: 握りつぶさずに投げなおす
+			throw $e;
+		}
+	}
+
+	/**
+	 * 開発者にメールを送信する
+	 * @param  string $code
+	 * @param  string $message
+	 * @return boolean 送信に思考したらtrue
+	 */
+	private function reportToDeveloper($code, $message)
+	{
+		// 開発者にメール送信
+		$subject = \Config::get('nextengine.debug.mail_subject');
+		$developers = \Config::get('nextengine.debug.developer');
+		$body = "[$code] $message";
+
+		return $this->mailTo($developers, $subject, $body);
+	}
+
+	/**
+	 * 営業にメールを送信する
+	 * @param  string $code
+	 * @param  string $message
+	 * @return boolean 送信に思考したらtrue
+	 */
+	private function reportToSales($code, $message)
+	{
+		$subject = \Config::get('nextengine.debug.mail_subject');
+		$sales = \Config::get('nextengine.debug.sales');
+		$body = "[$code] $message";
+
+		return $this->mailTo($sales, $subject, $body);
+	}
+
+	/**
+	 * メール送信ユーティリティ
+	 * @param  string,array $to      宛先（配列で複数指定可能）
+	 * @param  string       $subject 件名
+	 * @param  string       $body    本文
+	 * @param  string       $from    送信元（省略するとconfigにあるデフォルトのfromが適用される）
+	 * @return boolean 送信に成功したらtrue
+	 */
+	private function mailTo($to, $subject, $body, $from = null)
+	{
+		$email = \Email::forge();
+
+		if(!is_null($from)) {
+			$email->from($from);
+		}
+
+		$email->to($to);
+		$email->subject($subject);
+		$email->body($body);
+
+		return $email->send();
 	}
 }
