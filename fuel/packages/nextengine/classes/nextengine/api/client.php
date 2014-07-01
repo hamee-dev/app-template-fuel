@@ -7,7 +7,7 @@ require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 /**
  * ネクストエンジンAPIクライアント
  * 
- * 例外による処理の振り分けを実装しているのは継承クラスなので、そちらを参照。
+ * 例外による処理の振り分けを実装しているのは本クラスなので、そちらを参照。
  * @see Nextengine\Api\Client_Router
  * @see Nextengine\Api\Client_Batch
  */
@@ -66,17 +66,18 @@ class Client extends \neApiClient
 	 * ネクストエンジンAPIを叩く
 	 * 
 	 * ### 親クラスからの拡張点
-	 * レスポンスに含まれるresultフィールドの値がsuccessでないなら、例外を投げるという処理を追加した
+	 * - userプロパティがセットされており、アクセストークンが更新されたら自動でDBの値を更新する
+	 * - レスポンスに含まれるresultフィールドの値がsuccessでないなら、例外を投げるという処理を追加した
 	 *
 	 * @throws NextengineApiException
-	 * @return mixed [APIマニュアルよんでね]
+	 * @return mixed APIのレスポンス。詳しくはhttp://api.next-e.jp/request_url.phpを参照。
 	 */
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
 		$before_exec_access_token = $this->_access_token;
 		$response = parent::apiExecute($path, $api_params, $redirect_uri);
 
 		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php
-		//       エラー時の振る舞いについては、継承クラスのfailoverメソッドを参照。
+		//       エラー時の振る舞いについては、本クラスのfailoverメソッドを参照。
 		if($response['result'] !== self::RESULT_SUCCESS) {
 			$this->failover($response['code'], $response['message']);
 		}
@@ -103,7 +104,7 @@ class Client extends \neApiClient
 	public function setUser($user) {
 		// クライアントのアクセストークンがNULL以外で、DBの値と違っていたら、DBを更新
 		// NOTE: クライアントのプロパティが最も最新、DBの値はその次に新しい。優先すべきはクライアントのプロパティ。
-		if(!is_null($this->_access_token) && $user->access_token !== $this->_access_token) {
+		if(!is_null($this->_access_token) && ($user->access_token !== $this->_access_token)) {
 			$user->access_token = $this->_access_token;
 			$user->refresh_token = $this->_refresh_token;
 			$user->save();
@@ -162,7 +163,7 @@ class Client extends \neApiClient
 		// 開発者にメール送信
 		$subject = \Config::get('nextengine.debug.mail_subject');
 		$developers = \Config::get('nextengine.debug.developer');
-		$body = "[$code] $message";
+		$body = "[{$code}] {$message}";
 
 		return $this->mailTo($developers, $subject, $body);
 	}
@@ -177,7 +178,7 @@ class Client extends \neApiClient
 	{
 		$subject = \Config::get('nextengine.debug.mail_subject');
 		$sales = \Config::get('nextengine.debug.sales');
-		$body = "[$code] $message";
+		$body = "[{$code}] {$message}";
 
 		return $this->mailTo($sales, $subject, $body);
 	}
