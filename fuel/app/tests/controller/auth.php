@@ -1,18 +1,19 @@
 <?php
 
 require_once __DIR__.'/base.php';
+require_once __DIR__.'/../usedb.php';
 
 /**
  * Controller_Authのテスト
  */
-class Test_Controller_Auth extends Test_Controller_Base
+class Test_Controller_Auth extends Usedb
 {
-	// DBを初期化（テストのはじめに）
-	public static function setUpBeforeClass() {
-		Test_Model_Base::setUpBeforeClass();
-	}
-	public static function tearDownAfterClass() {
-		Test_Model_Base::tearDownAfterClass();
+	// 言語の設定をリセット
+	public function setUp() {
+		// CLIだとundefined indexと言われるので明示的にnullを設定
+		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = null;
+
+		Config::set('language', null);
 	}
 
 	private function getClient() {
