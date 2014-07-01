@@ -107,8 +107,8 @@ class Client extends \neApiClient
 			$this->user->refresh_token = $this->_refresh_token;
 			$this->user->save();
 
-			$user_key = Config::get('session.keys.ACCOUNT_USER');
-			Session::set($user_key, $this->user);
+			$user_key = \Config::get('session.keys.ACCOUNT_USER');
+			\Session::set($user_key, $this->user);
 		}
 
 		return $response;
