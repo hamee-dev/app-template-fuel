@@ -1,7 +1,17 @@
 <?php
 
 return array(
-	'client_id'		=> '2zG7d5MjXPh4m8',
-	'client_secret' => 'FTNubmlpyAgE5e3BnqWt6IHJ18voxVkMS9Yh4Zjc',
-	'redirect_uri'	=> 'https://localhost:8443/ne-base/auth/callback'
+	'client_id'		=> null,
+	'client_secret' => null,
+	'redirect_uri'	=> null,
+
+	'debug' => array(
+		// デバッグや通知メールを送るべき開発者
+		'developer'		=> array(),
+
+		// デバッグや通知メールを送るべき管理者（開発者の上位互換）
+		'administrator'	=> array(),
+
+		'mail_subject' => ''
+	)
 );
