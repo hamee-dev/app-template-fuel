@@ -192,29 +192,38 @@ abstract class Model_Base
 	}
 
 	/**
-	 * insert, updateのラッパー。  
-	 * 
 	 * インスタンスが既にDBに挿入されているか否かを考慮せずに呼び出すインタフェースを提供する。
-	 * 現在のインスタンスにidがセットされていれば`update`を、idがセットされていなければ`insert`を呼ぶ。
+	 * INSERT ON DEPLICATE KEY UPDATE文を実行する。
+	 * 公式ドキュメント：http://dev.mysql.com/doc/refman/5.1/ja/insert-on-duplicate.html
 	 * 
-	 * しかし、内部の挙動は単にメソッドを分けているだけなので、
-	 * `INSERT INTO ... DUPLICATE KEY UPDATE ...`
-	 * のようなSQLを発行しているわけではありません。
-	 * 
-	 * そのためsaveは、**シビアなタイミングまで求めると、DBの整合性を保証できるものではありません。**
-	 * しかし、上記のようなクエリを打つと挿入に時間がかかるため、デフォルトの動作にはしたくありません。
-	 * よって基底クラスとしては、動作が軽いsaveメソッドの実装を選択しています。
-	 * 
-	 * そのため、**シビアなタイミング制御が必要になった場合は、その処理は自前で実装してください。**
+	 * NOTE: MySQL構文のため、MySQL以外のDBでsaveメソッドを使用することは出来ません。
 	 * 
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
-	public function save($insert_ignore = false) {
-		if($this->isNew()) {
-			return $this->insert($insert_ignore);
-		} else {
-			return $this->update();
+	public function save() {
+		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
+		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
+		$query = DB::insert($this->_getTableName())->set($this->toArray());
+
+		// ON DUPLICATE KEY UPDATE以降で更新する値を、自前でなくクエリビルダを利用して生成する
+		// FIXME: かなりゴリ押し。テーブル名が大文字でSETとかだった場合にバグります。
+		$update_sql    = DB::update($this->_getTableName())->set($this->toArray())->compile();
+		$set_pos       = mb_strpos($update_sql, ' SET ');
+		$after_set_sql = mb_substr($update_sql, $set_pos + 5);	// ' SET 'の3文字を読み飛ばす
+
+		$insert_or_update_query = DB::query($query->compile().' ON DUPLICATE KEY UPDATE '.$after_set_sql);
+
+		$this->before_save($insert_or_update_query);
+		$ret = $this->executeInTransaction($insert_or_update_query);
+
+		$result = false;
+		if($ret[1] > 0) {
+			$this->id = $ret[0];
+			$result = true;
 		}
+
+		$this->after_save($result);
+		return $result;
 	}
 
 	/**
