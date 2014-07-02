@@ -30,7 +30,12 @@ abstract class Controller_Neapi extends Controller_Base {
 			Response::redirect('/auth/login');
 		}
 
+		// セッションに対応したユーザが以内ならログイン処理へリダイレクト
 		$user = Model_User::find($session_user->id);
+		if(is_null($user)) {
+			Response::redirect('/auth/login');
+		}
+
 		self::$client = new Nextengine\Api\Client_Router();
 		self::$client->setUser($user);
 	}
