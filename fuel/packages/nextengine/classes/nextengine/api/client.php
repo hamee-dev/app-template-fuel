@@ -101,7 +101,7 @@ class Client extends \neApiClient
 	 * @param Model_User $user ユーザのインスタンス
 	 * @return void
 	 */
-	public function setUser($user) {
+	public function setUser(\Model_User $user) {
 		// クライアントのアクセストークンがNULL以外で、DBの値と違っていたら、DBを更新
 		// NOTE: クライアントのプロパティが最も最新、DBの値はその次に新しい。優先すべきはクライアントのプロパティ。
 		if(!is_null($this->_access_token) && ($user->access_token !== $this->_access_token)) {
