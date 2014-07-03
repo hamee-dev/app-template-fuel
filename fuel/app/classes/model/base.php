@@ -118,6 +118,9 @@ abstract class Model_Base
 			$this->created_at = DB::expr('NOW()');
 		}
 
+		$this->before_save();
+		$this->before_insert();
+
 		$query = DB::insert($table_name)->set($this->toArray());
 
 		if($insert_ignore) {
@@ -129,9 +132,6 @@ abstract class Model_Base
 				$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6), DB::INSERT);
 			}
 		}
-
-		$this->before_save($query);
-		$this->before_insert($query);
 
 		$ret = $this->executeInTransaction($query);
 
@@ -156,11 +156,11 @@ abstract class Model_Base
 	 * @return boolean
 	 */
 	public function update() {
+		$this->before_save();
+		$this->before_update();
+
 		$table_name = $this->_getTableName();
 		$query = DB::update($table_name)->set($this->toArray());
-
-		$this->before_save($query);
-		$this->before_update($query);
 
 		// NOTE: $retがintなら更新された行数（成功）、NULLなら失敗
 		$ret = $this->executeInTransaction($query);
@@ -177,10 +177,10 @@ abstract class Model_Base
 	 * @return boolean
 	 */
 	public function delete() {
+		$this->before_delete();
+
 		$table_name = $this->_getTableName();
 		$query = DB::delete($table_name)->where('id', $this->id);
-
-		$this->before_delete($query);
 
 		// NOTE: $retがintなら削除された行数（成功）、NULLなら失敗
 		$ret = $this->executeInTransaction($query);
@@ -201,6 +201,8 @@ abstract class Model_Base
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
 	public function save() {
+		$this->before_save();
+
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
 		$query = DB::insert($this->_getTableName())->set($this->toArray());
@@ -213,7 +215,6 @@ abstract class Model_Base
 
 		$insert_or_update_query = DB::query($query->compile().' ON DUPLICATE KEY UPDATE '.$after_set_sql);
 
-		$this->before_save($insert_or_update_query);
 		$ret = $this->executeInTransaction($insert_or_update_query);
 
 		$result = false;
@@ -310,8 +311,13 @@ abstract class Model_Base
 					->limit(1)
 					->as_object(get_called_class());
 
-		$ret = $query->execute();
-		return self::after_find($ret[0]);
+		$result = $query->execute()->as_array();
+		if(count($result) > 0) {
+			$models = static::after_find($result);
+			return $models[0];
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -325,7 +331,7 @@ abstract class Model_Base
 					->as_object(get_called_class());
 
 		$ret = $query->execute();
-		return self::after_find($ret->as_array());
+		return static::after_find($ret->as_array());
 	}
 
 	/**
@@ -344,7 +350,7 @@ abstract class Model_Base
 
 		$ret = $query->execute();
 
-		return self::after_find($ret->as_array());
+		return static::after_find($ret->as_array());
 	}
 
 	/**
@@ -355,7 +361,7 @@ abstract class Model_Base
 	 * @return array 条件にマッチした行をインスタンス化した要素の配列
 	 */
 	public static function findLike($column, $value) {
-		return self::findBy($column, "%$value%", 'LIKE');
+		return static::findBy($column, "%$value%", 'LIKE');
 	}
 
 	/**
@@ -429,7 +435,7 @@ abstract class Model_Base
 	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
 	 * @return void
 	 */
-	protected function before_save(\Database_Query &$query) {}
+	protected function before_save() {}
 
 	/**
 	 * 挿入処理の直前に実行できるフック
@@ -437,7 +443,7 @@ abstract class Model_Base
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_insert(\Database_Query &$query) {}
+	protected function before_insert() {}
 
 	/**
 	 * 更新処理の直前に実行できるフック
@@ -445,7 +451,7 @@ abstract class Model_Base
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_update(\Database_Query &$query) {}
+	protected function before_update() {}
 
 	/**
 	 * 削除処理の直前に実行できるフック
@@ -453,7 +459,7 @@ abstract class Model_Base
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
-	protected function before_delete(\Database_Query &$query) {}
+	protected function before_delete() {}
 
 	/**
 	 * バリデーション処理の直前に実行できるフック
@@ -512,10 +518,16 @@ abstract class Model_Base
 	 */
 	protected function after_validate($success) {}
 
-
-	// =======================================
-	// 非公開メソッド
-	// =======================================
+	/**
+	 * フックをコールするためのメソッド
+	 * @param  string $hook_name 実行するフック名
+	 * @param  mixed  $args      フックに渡す引数
+	 * @return mixed フックの戻り値
+	 */
+	protected function hook($hook_name/*, $args... */) {
+		$args = array_slice(func_get_args(), 1);
+		return call_user_func_array(array($this, $hook_name), $args);
+	}
 
 	/**
 	 * トランザクションを張りその中で処理を実行する
@@ -551,24 +563,28 @@ abstract class Model_Base
 	}
 
 	/**
-	 * トランザクション配下でクエリを実行し、その値を返す
-	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
-	 */
-	protected function executeInTransaction($query) {
-		return self::transactionDo(function($query) {
-			return $query->execute();
-		}, $query);
-	}
-
-	/**
 	 * モデルのクラス名からテーブル名を取得する
 	 * クラス上部の説明にある命名規則を参照。
 	 * 
 	 * @return string クラス名を小文字かつ複数形にしたテーブル名
 	 */
-	private static function _getTableName() {
+	protected static function _getTableName() {
 		$lower_class_name = strtolower(get_called_class());
 		$model_removed = Str::sub($lower_class_name, strlen('model_'));
 		return Inflector::pluralize($model_removed);
+	}
+
+	// =======================================
+	// 非公開メソッド
+	// =======================================
+
+	/**
+	 * トランザクション配下でクエリを実行し、その値を返す
+	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
+	 */
+	private function executeInTransaction($query) {
+		return self::transactionDo(function($query) {
+			return $query->execute();
+		}, $query);
 	}
 }

@@ -252,38 +252,6 @@ class Test_Model_Base extends Usedb
 		$this->assertEquals(0, $matched_row_count);
 	}
 
-	// NOTE: saveはクエリビルダを渡せない。"クエリ"で間違いない
-	function test_before_save_第一引数にクエリのインスタンスが渡される() {
-		$expected_arg = $this->isInstanceOf('Database_Query');
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_save', $expected_arg);
-
-		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->save(); } catch(Exception $e) {}
-	}
-	// NOTE: saveはクエリビルダを渡せない。"クエリ"で間違いない
-	function test_before_insert_第一引数にクエリのインスタンスが渡される() {
-		$expected_arg = $this->isInstanceOf('Database_Query');
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_insert', $expected_arg);
-
-		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->insert(); } catch(Exception $e) {}
-	}
-
-	function test_before_update_第一引数にクエリビルダーのインスタンスが渡される() {
-		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_update', $expected_arg);
-
-		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->update(); } catch(Exception $e) {}
-	}
-	function test_before_delete_第一引数にクエリビルダーのインスタンスが渡される() {
-		$expected_arg = $this->isInstanceOf('Database_Query_Builder');
-		$mock = $this->getHookFirstArgument('Model_Test', 'before_delete', $expected_arg);
-
-		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
-		try { $mock->delete(); } catch(Exception $e) {}
-	}
-
 	// FIXME: staticメソッドのコール確認の方法がわからない
 	// function test_transactionDo_トランザクションが実行されている() {}
 	// function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {}
