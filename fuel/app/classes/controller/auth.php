@@ -12,7 +12,7 @@ class Controller_Auth extends Controller_Base {
 	}
 
 	/**
-	 * route: /demo/auth/login
+	 * route: /auth/login
 	 */
 	public function action_login()
 	{
@@ -20,7 +20,7 @@ class Controller_Auth extends Controller_Base {
 	}
 
 	/**
-	 * route: /demo/auth/logout
+	 * route: /auth/logout
 	 */
 	public function action_logout()
 	{
@@ -29,7 +29,7 @@ class Controller_Auth extends Controller_Base {
 	}
 
 	/**
-	 * route: /demo/auth/callback
+	 * route: /auth/callback
 	 */
 	public function action_callback()
 	{
