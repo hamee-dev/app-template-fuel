@@ -88,9 +88,9 @@ abstract class Model_Base
 	 *                 エラーがあればfalseを返し、validationErrorsにエラーメッセージを格納する
 	 */
 	public function validate() {
-		$this->before_validate();
+		$this->hook('before_validate');
 		$ret = $this->runValidate();
-		$this->after_validate($ret);
+		$this->hook('after_validate', $ret);
 
 		return $ret;
 	}
@@ -118,8 +118,8 @@ abstract class Model_Base
 			$this->created_at = DB::expr('NOW()');
 		}
 
-		$this->before_save();
-		$this->before_insert();
+		$this->hook('before_save');
+		$this->hook('before_insert');
 
 		$query = DB::insert($table_name)->set($this->toArray());
 
@@ -143,8 +143,8 @@ abstract class Model_Base
 			$result = true;
 		}
 
-		$this->after_insert($result);
-		$this->after_save($result);
+		$this->hook('after_insert', $result);
+		$this->hook('after_save', $result);
 
 		return $result;
 	}
@@ -156,8 +156,8 @@ abstract class Model_Base
 	 * @return boolean
 	 */
 	public function update() {
-		$this->before_save();
-		$this->before_update();
+		$this->hook('before_save');
+		$this->hook('before_update');
 
 		$table_name = $this->_getTableName();
 		$query = DB::update($table_name)->set($this->toArray());
@@ -166,8 +166,8 @@ abstract class Model_Base
 		$ret = $this->executeInTransaction($query);
 		$result = is_int($ret);
 
-		$this->after_update($result);
-		$this->after_save($result);
+		$this->hook('after_update', $result);
+		$this->hook('after_save', $result);
 
 		return $result;
 	}
@@ -177,7 +177,7 @@ abstract class Model_Base
 	 * @return boolean
 	 */
 	public function delete() {
-		$this->before_delete();
+		$this->hook('before_delete');
 
 		$table_name = $this->_getTableName();
 		$query = DB::delete($table_name)->where('id', $this->id);
@@ -186,7 +186,7 @@ abstract class Model_Base
 		$ret = $this->executeInTransaction($query);
 		$result = is_int($ret);
 
-		$this->after_delete($result);
+		$this->hook('after_delete', $result);
 
 		return $result;
 	}
@@ -201,7 +201,7 @@ abstract class Model_Base
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
 	public function save() {
-		$this->before_save();
+		$this->hook('before_save');
 
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
@@ -223,7 +223,7 @@ abstract class Model_Base
 			$result = true;
 		}
 
-		$this->after_save($result);
+		$this->hook('after_save', $result);
 		return $result;
 	}
 
@@ -471,9 +471,9 @@ abstract class Model_Base
 	/**
 	 * find処理の直後に実行できるフック  
 	 * find, findBy, findLikeでコールされる。
-	 * このメソッドの戻り値がfindメソッドの戻り値として使用されるので扱いに要注意。
+	 * このメソッドの戻り値が、findメソッドの戻り値として使用されるので扱いに要注意。
 	 * このメソッドだけstaticなので要注意。
-	 * @param  mixed $record 取得した値（インスタンス単体の場合もインスタンスの配列の可能性もある）
+	 * @param  mixed $record インスタンスの配列
 	 * @return array
 	 */
 	protected static function after_find($record) { return $record; }
