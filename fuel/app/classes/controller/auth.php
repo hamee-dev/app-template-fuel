@@ -13,6 +13,10 @@ class Controller_Auth extends Controller_Base {
 
 	/**
 	 * route: /auth/login
+	 * 
+	 * ネクストエンジンAPIクライアントクラスの`neLogin`メソッドを呼び出す。  
+	 * neLoginの認証処理につきましては、SDKのドキュメントを御覧下さい。
+	 * http://api.next-e.jp/sdk.php#php
 	 */
 	public function action_login()
 	{
@@ -30,6 +34,8 @@ class Controller_Auth extends Controller_Base {
 
 	/**
 	 * route: /auth/callback
+	 * ネクストエンジンAPIの認証が済むとリダイレクトされるメソッドです。
+	 * セッションやGETパラメータの値を見て、認証済みのデータをDBとセッションに保存します。
 	 */
 	public function action_callback()
 	{
@@ -59,7 +65,10 @@ class Controller_Auth extends Controller_Base {
 		Session::set($company_key, $company);
 		Session::set($user_key, $user);
 
-		// FIXME: 簡素なHTMLとはいえ、ビュー側でやるべきこと
+		// NOTE: 動作デモを試したら、コメントアウトを解除して任意の場所へリダイレクトさせて下さい。
+		//       http://api.next-e.jp/secret/sample-fuelphp/about-sample.php
+		// Response::redirect('/demo/api/find')
+
 		$this->template->title = 'Authenticate complete!!';
 		$this->template->content = "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
 	}
