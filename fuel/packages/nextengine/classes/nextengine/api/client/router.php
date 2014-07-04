@@ -21,7 +21,7 @@ class Client_Router extends Client
 	 * @return array [Model_Company, Model_User]のインスタンスの配列。listで受け取る想定。
 	 */
 	public function authenticate($uid) {
-		// APIを１回は呼ばないといけない
+		// APIを１回は呼ばないと、アクセストークンとリフレッシュトークンが入手できない
 		$company = $this->_createCompany();
 		$users = \Model_User::findBy('uid', $this->_uid);
 
