@@ -277,10 +277,9 @@ abstract class Model_Base
 	 * 
 	 * @param  array   $columns       カラム名を列挙した配列。ここで指定したカラム順にvaluesを設定する。
 	 * @param  array   $values        値の列挙。１つ１つのカラムに挿入する値を配列で指定する。
-	 * @param  boolean $insert_ignore INSERT IGNORE句を使用する
 	 * @return array   挿入されたインスタンスの配列
 	 */
-	public static function create(array $columns, array $values, $insert_ignore = false) {
+	public static function create(array $columns, array $values) {
 		$ret = array();
 		// NOTE: デバッグの際に検索しやすいよう、$iではなく重複しにくい$iiを使用している。
 		for($ii = 0, $length = count($values[0]); $ii < $length; $ii++) {

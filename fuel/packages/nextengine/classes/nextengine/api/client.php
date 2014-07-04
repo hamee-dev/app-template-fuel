@@ -84,7 +84,7 @@ class Client extends \neApiClient
 
 		// APIを叩く前後でアクセストークンが変わっていたら、ユーザモデルを更新してDBに反映、セッションも更新する
 		// ただしユーザモデルが格納されていない場合もあるので、その場合はその処理を行わない
-		if(!is_null($this->user) && $before_exec_access_token !== $this->_access_token) {
+		if(!is_null($this->user) && ($before_exec_access_token !== $this->_access_token)) {
 			$this->user->access_token  = $this->_access_token;
 			$this->user->refresh_token = $this->_refresh_token;
 			$this->user->save();
@@ -139,7 +139,7 @@ class Client extends \neApiClient
 			throw new NextengineApiException($message, $code);
 		} catch(NextengineApiException $e) {
 			switch($e->getCode()) {
-				// 支払い等の理由で利用停止、システムエラー => 営業に問い合わせてねエラー画面へリダイレクト
+				// 支払い等の理由で利用停止、システムエラー => 営業に問い合わせて下さい画面へリダイレクト
 				case '001007':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '002003':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '003003':	// [xxxxx]様のメイン機能が、利用停止です。
