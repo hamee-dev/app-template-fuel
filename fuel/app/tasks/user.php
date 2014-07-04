@@ -45,7 +45,7 @@ class User
 		foreach($users as $user) {
 			// NOTE: $usersがnullならそもそもプロパティにアクセスできないので別if文にしている
 			if(is_null($users)) continue;
-			if(is_null($user->access_token) || is_null($user->access_token)) continue;
+			if(is_null($user->access_token) || is_null($user->refresh_token)) continue;
 
 			$this->_refresh($user);
 		}
