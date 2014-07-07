@@ -77,9 +77,9 @@ class Client extends \neApiClient
 		$response = parent::apiExecute($path, $api_params, $redirect_uri);
 
 		// 親クラスのapiExecuteを実行してもリフレッシュトークンがNULLのまま = リフレッシュトークンの設定が無効になっている
-		// code: -1, message: このアプリはリフレッシュトークンの利用が許可されていません。
+		// code: -1, message: このアプリは必ずリフレッシュトークンの利用が許可されている必要があります。
 		if(is_null($this->refresh_token)) {
-			$this->failover('-1', 'このアプリはリフレッシュトークンの利用が許可されていません。');
+			$this->failover('-1', 'このアプリは必ずリフレッシュトークンの利用が許可されている必要があります。');
 		}
 
 		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php
