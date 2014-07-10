@@ -78,7 +78,7 @@ class Client extends \neApiClient
 
 		// 親クラスのapiExecuteを実行してもリフレッシュトークンがNULLのまま = リフレッシュトークンの設定が無効になっている
 		// code: -1, message: このアプリは必ずリフレッシュトークンの利用が許可されている必要があります。
-		if(is_null($this->refresh_token)) {
+		if(is_null($this->_refresh_token)) {
 			$this->failover('-1', 'このアプリは必ずリフレッシュトークンの利用が許可されている必要があります。');
 		}
 
