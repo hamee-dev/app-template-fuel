@@ -47,6 +47,11 @@ abstract class Model_Base
 	public $updated_at = null;
 
 	/**
+	 * findで比較に用いる主キー
+	 */
+	protected static $primaryKey = 'id';
+
+	/**
 	 * バリデーション時のエラー情報を格納
 	 * @var array
 	 */
@@ -62,6 +67,7 @@ abstract class Model_Base
 		'ignoreSaveKey',
 		'id',
 		'updated_at',
+		'primaryKey',
 		'validationErrors',
 	);
 
@@ -180,7 +186,7 @@ abstract class Model_Base
 		$this->hook('before_delete');
 
 		$table_name = $this->_getTableName();
-		$query = DB::delete($table_name)->where('id', $this->id);
+		$query = DB::delete($table_name)->where(static::$primaryKey, $this->{static::$primaryKey});
 
 		// NOTE: $retがintなら削除された行数（成功）、NULLなら失敗
 		$ret = $this->executeInTransaction($query);
@@ -306,7 +312,7 @@ abstract class Model_Base
 		$table_name = (new static())->_getTableName();
 		$query = DB::select()
 					->from($table_name)
-					->where('id', $id)
+					->where(static::$primaryKey, $id)
 					->limit(1)
 					->as_object(get_called_class());
 
@@ -375,7 +381,10 @@ abstract class Model_Base
 	 * @param   string  Column to group by
 	 * @return  int     The number of rows OR false
 	 */
-	public static function count($column = 'id', $distinct = true, $where = array(), $group_by = null) {
+	public static function count($column = null, $distinct = true, $where = array(), $group_by = null) {
+		// カラムの指定がなければ主キーを使用する
+		if(is_null($column)) $column = static::$primaryKey;
+
 		$table_name = (new static())->_getTableName();
 
 		$distinct_token = ($distinct ? 'DISTINCT ' : '');
