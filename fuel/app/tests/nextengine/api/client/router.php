@@ -78,7 +78,7 @@ class Test_Nextengine_Api_Client_Router extends Test_Nextengine_Api_Client
 		$user = $_createUser->invokeArgs($client, array($company->id));
 		$this->assertInstanceOf('Model_User', $user);
 	}
-	function test__createUser_存在しないcompany_idのデータは作成できない※Fキー制約が効いている() {
+	function test__createUser_存在しないcompany_idのデータは作成できない_Fキー制約が効いている() {
 		$_createUser    = $this->getMethod('Nextengine\Api\Client_Router', '_createUser');
 		$client    = $this->getClient();
 
