@@ -65,7 +65,7 @@ class Test_Controller_Auth extends Usedb
 		return $mock;
 	}
 
-	function test_action_callback_SESSIONがなく、GETのuidとstateがあるならGETを使って認証処理を行う() {
+	function test_action_callback_SESSIONがなくGETのuidとstateがあるならGETを使って認証処理を行う() {
 		$user_key = Config::get('session.keys.ACCOUNT_USER');
 		Session::set($user_key, null);
 		// 単にGETに値を入れたいだけで、任意の文字列を入れている。
@@ -82,7 +82,7 @@ class Test_Controller_Auth extends Usedb
 		//       ダミー情報をセットしているので認証するため、リダイレクトがかかる。ので発生する例外を無視する。
 		try { $controller->action_callback(); } catch(\Exception $e) {}
 	}
-	function test_action_callback_SESSIONがある、GETはない場合はセッションを用い認証を行う() {
+	function test_action_callback_SESSIONがありGETはない場合はセッションを用い認証を行う() {
 		$user = new Model_User(array(
 			'uid' => 'hogehoge'
 		));

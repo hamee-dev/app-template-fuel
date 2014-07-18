@@ -15,9 +15,9 @@ class Test_Nextengine_Api_Client_Router extends Test_Nextengine_Api_Client
 		return $client;
 	}
 	function test_authenticate_createCompanyが呼ばれる() {}
-	function test_authenticate_uidに対応するユーザがいる場合、ユーザ取得用のAPIは叩かれない() {}
-	function test_authenticate_uidに対応するユーザがいない場合、ユーザ取得用のAPIが叩かれる() {}
-	function test_authenticate_戻り値は配列で、企業、ユーザの順の配列で帰ってくる() {}
+	function test_authenticate_uidに対応するユーザがいる場合_ユーザ取得用のAPIは叩かれない() {}
+	function test_authenticate_uidに対応するユーザがいない場合_ユーザ取得用のAPIが叩かれる() {}
+	function test_authenticate_戻り値は配列で_企業_ユーザの順の配列で帰ってくる() {}
 
 	// FIXME: リダイレクトが走るとexitされてしまうのでテストできない
 	// function test_failover_コードが002007_003004（メンテナンス中系）の場合はメンテナンス画面へリダイレクトする() {}

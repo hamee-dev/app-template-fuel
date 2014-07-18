@@ -27,7 +27,7 @@ class Test_Controller_Base extends PHPUnit_Framework_TestCase
 		$lang = $getLocale->invokeArgs(null, array('ja,en,kr,in'));
 		$this->assertEquals($expected, $lang);
 	}
-	public function test_getLocale_先頭に空白文字が入っていたら無視して、先頭の２文字を返す() {
+	public function test_getLocale_先頭に空白文字が入っていたら無視し先頭の２文字を返す() {
 		$expected = 'ja';
 		$getLocale = $this->getGetLocale();
 

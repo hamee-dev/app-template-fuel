@@ -259,7 +259,7 @@ class Test_Model_Base extends Usedb
 
 	// NOTE: クラス名->テーブル名の変換ルールについてはこちらを参照
 	// http://ne0.next-engine.org:10080/ld3sl/issues/6297#クラス名とテーブル名の命名規約
-	function test__getTableName_クラス名からModel_を取り除き、小文字かつ複数形にした文字列が返却される() {
+	function test__getTableName_クラス名からModel_を取り除き小文字かつ複数形にした文字列が返却される() {
 		$table_name = $this->getGetTableName('Model_Test')->invokeArgs(null, array());
 		$this->assertEquals('tests', $table_name);
 	}

@@ -33,7 +33,7 @@ class Test_Nextengine_Api_Client extends Test_Model_Base
 		$this->assertInstanceOf('Nextengine\Api\Client', $instance);
 	}
 
-	function test_construct_引数にクライアントID、シークレット、リダイレクトURIを渡すとプロパティに反映されている() {
+	function test_construct_引数にクライアントID_シークレット_リダイレクトURIを渡すとプロパティに反映されている() {
 		$arg = array(
 			'client_id'     => 'aaa',
 			'client_secret' => 'bbb',
@@ -52,7 +52,7 @@ class Test_Nextengine_Api_Client extends Test_Model_Base
 		$this->assertEquals('ccc', $_redirect_uri->getValue($client));
 	}
 
-	function test_setUser_クライアントのアクセストークンと渡したユーザのアクセストークンが違ったら、クライアント側のアクセストークンで上書きされる() {
+	function test_setUser_クライアントのアクセストークンと渡したユーザのアクセストークンが違ったら_クライアント側のアクセストークンで上書きされる() {
 		$mockUser = $this->getMock('Model_User', array('save'));
 		$mockUser->expects($this->once())
 				->method('save');
@@ -65,7 +65,7 @@ class Test_Nextengine_Api_Client extends Test_Model_Base
 		$this->assertEquals($client->_access_token, $mockUser->access_token);
 		$this->assertEquals($client->_refresh_token, $mockUser->refresh_token);
 	}
-	function test_setUser_まだAPIが呼ばれていない状態でアクセストークンのあるユーザが渡されたら、ユーザモデル側のアクセストークンで上書きされる() {
+	function test_setUser_まだAPIが呼ばれていない状態でアクセストークンのあるユーザが渡されたら_ユーザモデル側のアクセストークンで上書きされる() {
 		$mockUser = $this->getMock('Model_User', array('save'));
 		$mockUser->expects($this->never())
 				->method('save');
@@ -87,7 +87,7 @@ class Test_Nextengine_Api_Client extends Test_Model_Base
 	// 	);
 	// }
 
-	function test_failover_呼び出されるとそのコード、メッセージでNextengineApiExceptionを投げる() {
+	function test_failover_呼び出されるとそのコード_メッセージでNextengineApiExceptionを投げる() {
 		$failover = $this->getMethod('Nextengine\Api\Client', 'failover');
 		$this->setExpectedException('Nextengine\Api\NextengineApiException', 'hoge', '0123');
 
