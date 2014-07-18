@@ -47,6 +47,11 @@ abstract class Model_Base
 	public $updated_at = null;
 
 	/**
+	 * findで比較に用いる主キー
+	 */
+	protected static $primaryKey = 'id';
+
+	/**
 	 * バリデーション時のエラー情報を格納
 	 * @var array
 	 */
@@ -62,6 +67,7 @@ abstract class Model_Base
 		'ignoreSaveKey',
 		'id',
 		'updated_at',
+		'primaryKey',
 		'validationErrors',
 	);
 
