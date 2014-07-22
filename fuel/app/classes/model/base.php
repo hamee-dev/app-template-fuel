@@ -139,7 +139,7 @@ abstract class Model_Base
 			}
 		}
 
-		$ret = $this->executeInTransaction($query);
+		$ret = $query->execute();
 
 		$result = false;
 		// NOTE: 挿入に失敗していたら、idが無いので設定のしようがない
@@ -169,7 +169,7 @@ abstract class Model_Base
 		$query = DB::update($table_name)->set($this->toArray());
 
 		// NOTE: $retがintなら更新された行数（成功）、NULLなら失敗
-		$ret = $this->executeInTransaction($query);
+		$ret = $query->execute();
 		$result = is_int($ret);
 
 		$this->hook('after_update', $result);
@@ -189,7 +189,7 @@ abstract class Model_Base
 		$query = DB::delete($table_name)->where(static::$primaryKey, $this->{static::$primaryKey});
 
 		// NOTE: $retがintなら削除された行数（成功）、NULLなら失敗
-		$ret = $this->executeInTransaction($query);
+		$ret = $query->execute();
 		$result = is_int($ret);
 
 		$this->hook('after_delete', $result);
@@ -221,7 +221,7 @@ abstract class Model_Base
 
 		$insert_or_update_query = DB::query($query->compile().' ON DUPLICATE KEY UPDATE '.$after_set_sql);
 
-		$ret = $this->executeInTransaction($insert_or_update_query);
+		$ret = $insert_or_update_query->execute();
 
 		$result = false;
 		if($ret[1] > 0) {
@@ -564,6 +564,7 @@ abstract class Model_Base
 
 		} catch(Database_Exception $e) {
 			DB::rollback_transaction();
+			throw new Database_Exception($e);
 			$ret = null;
 		}
 
@@ -580,19 +581,5 @@ abstract class Model_Base
 		$lower_class_name = strtolower(get_called_class());
 		$model_removed = Str::sub($lower_class_name, strlen('model_'));
 		return Inflector::pluralize($model_removed);
-	}
-
-	// =======================================
-	// 非公開メソッド
-	// =======================================
-
-	/**
-	 * トランザクション配下でクエリを実行し、その値を返す
-	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
-	 */
-	private function executeInTransaction($query) {
-		return self::transactionDo(function($query) {
-			return $query->execute();
-		}, $query);
 	}
 }
