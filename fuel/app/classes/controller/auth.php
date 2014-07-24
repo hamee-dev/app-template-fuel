@@ -67,9 +67,10 @@ class Controller_Auth extends Controller_Base {
 
 		// NOTE: 動作デモを試したら、コメントアウトを解除して任意の場所へリダイレクトさせて下さい。
 		//       http://api.next-e.jp/secret/sample-fuelphp/about-sample.php
-		// Response::redirect('/demo/api/find')
+		// Response::redirect('/demo/api/find');
 
+		// NOTE: 上記を編集しリダイレクトさせる場合には下記の記述は不要です。
 		$this->template->title = 'Authenticate complete!!';
-		$this->template->content = "<a href='".\Uri::create('/demo/api/find')."'>APIのデモを見る</a>";
+		$this->template->content = "";
 	}
 }
