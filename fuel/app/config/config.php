@@ -84,8 +84,10 @@ return array(
 
 	/**
 	 * Internal string encoding charset
+	 * NOTE: ネクストエンジンAPIがUTF-8のため、アプリも合わせてUTF-8とします
+	 *       エンコーディングを変更したい場合には、APIのリクエストとレスポンスをエンコーディングをする必要があります
 	 */
-	// 'encoding'  => 'UTF-8',
+	'encoding'  => 'UTF-8',
 
 	/**
 	 * DateTime settings
