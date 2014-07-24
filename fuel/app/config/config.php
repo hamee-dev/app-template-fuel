@@ -273,6 +273,7 @@ return array(
 		'packages'  => array(
 			'email',
 			'nextengine',
+			'automation',
 			//'orm',
 		),
 
