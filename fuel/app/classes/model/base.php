@@ -166,7 +166,9 @@ abstract class Model_Base
 		$this->hook('before_update');
 
 		$table_name = $this->_getTableName();
-		$query = DB::update($table_name)->set($this->toArray());
+		$query = DB::update($table_name)
+					->set($this->toArray())
+					->where(self::$primaryKey, $this->{self::$primaryKey});
 
 		// NOTE: $retがintなら更新された行数（成功）、NULLなら失敗
 		$ret = $query->execute();
