@@ -14,8 +14,8 @@ class Create_users
 			'email' 			=> array('constraint' => 255, 'type' => 'varchar'),
 			'access_token' 		=> array('constraint' => 128, 'type' => 'char', 'null' => true),
 			'refresh_token' 	=> array('constraint' => 128, 'type' => 'char', 'null' => true),
-			'updated_at' 		=> array('type' => 'timestamp'),
-			'created_at' 		=> array('type' => 'timestamp'),
+			'updated_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+			'created_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP')),
 
 		), array('id'), true, 'InnoDB');
 
