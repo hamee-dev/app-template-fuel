@@ -119,11 +119,6 @@ abstract class Model_Base
 	public function insert($insert_ignore = false) {
 		$table_name = $this->_getTableName();
 
-		// created_atが指定されていたらその値を優先する、無ければNOW()を格納
-		if(is_null($this->created_at)) {
-			$this->created_at = DB::expr('NOW()');
-		}
-
 		$this->hook('before_save');
 		$this->hook('before_insert');
 
@@ -210,10 +205,6 @@ abstract class Model_Base
 	 */
 	public function save() {
 		$this->hook('before_save');
-
-		if(is_null($this->created_at)) {
-			$this->created_at = DB::expr('NOW()');
-		}
 
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する

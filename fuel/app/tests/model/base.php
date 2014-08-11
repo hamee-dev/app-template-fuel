@@ -225,6 +225,19 @@ class Test_Model_Base extends Test_Common
 
 		$this->assertEquals($model, Model_Test::find(1));
 	}
+	function test_update_updated_atは更新され_created_atは更新されない() {
+		$models = Model_Test::findAll();
+		$model = $models[0];
+
+		$model->varchar_column = 'rewrite from test';
+		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプに変化を起こさせる
+		$model->update();
+
+		$updated_model = Model_Test::find($model->id);
+
+		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
+		$this->assertEquals($model->created_at, $updated_model->created_at);
+	}
 	function test_update_戻り値はboolean() {
 		$model = Model_Test::find(1);
 		$this->assertTrue(is_bool($model->update()));
@@ -247,6 +260,37 @@ class Test_Model_Base extends Test_Common
 	// 	// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
 	// 	try { $mock->save(); } catch(Exception $e) {}
 	// }
+	function test_save_新規挿入の際にはcreated_atとupdated_atにNOWの値（CURRENT_TIMESTAMP）が格納される() {
+		$now = DB::query('SELECT NOW()')->execute()->as_array();
+		$now = $now[0]['NOW()'];
+
+		$model = new Model_Test(array(
+			'int_column' => 1,
+			'varchar_column' => 'hoge',
+			'test_column' => 'hogehoge',
+			'bigint_column' => 123,
+			'bool_column' => false,
+		));
+		$model->insert();
+
+		$model = Model_Test::find($model->id);	// NOTE: updated_atとcreated_atが更新されないので再取得
+
+		$this->assertEquals($model->created_at, $now);
+		$this->assertEquals($model->updated_at, $now);
+	}
+	function test_save_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
+		$models = Model_Test::findAll();
+		$model = $models[0];
+
+		$model->varchar_column = 'rewrite from test';
+		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
+		$model->save();
+
+		$updated_model = Model_Test::find($model->id);
+
+		$this->assertEquals($model->created_at, $updated_model->created_at);
+		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
+	}
 
 	// delete()
 	function test_delete_内部でbefore_deleteフックが呼ばれる() {
