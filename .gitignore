@@ -16,3 +16,4 @@ build
 /fuel/app/config/crypt.php
 nbproject/
 
+.vagrant
