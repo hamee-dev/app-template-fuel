@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__.'/../common.php';
+
 // testsテーブルを用いてデータをDBに保存するテストを行うためのモデル
 class Model_Test extends Model_Base {
 	public $int_column;
@@ -25,19 +27,19 @@ class Test_Model_Base extends Test_Common
 		\DBUtil::create_table('tests', array(
 			'id' 				=> array('constraint' => 11,  'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
 			'int_column'		=> array('type' => 'int'),
-			'varchar_column'	=> array('type' => 'varchar'),
+			'varchar_column'	=> array('type' => 'varchar', 'constraint' => 50),
 			'test_column'		=> array('type' => 'text'),
 			'bigint_column'		=> array('type' => 'bigint'),
-			'bool_column'		=> array('type' => 'tinyint'),
+			'bool_column'		=> array('type' => 'bool'),
 			'updated_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
 			'created_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP')),
 
 		), array('id'), true, 'InnoDB');
 	}
 
-	/**
-	 * ユーティリティ
-	 */
+	// ------------------------------------------------------------
+	//  ▼ ユーティリティ ▼
+	// ------------------------------------------------------------
 	private function getGetTableName($class_name) {
 		$ref = new ReflectionClass($class_name);
 		$_getTableName = $ref->getMethod('_getTableName');
@@ -62,9 +64,9 @@ class Test_Model_Base extends Test_Common
 		return $mock;
 	}
 
-	/**
-	 * テストコード
-	 */
+	// ------------------------------------------------------------
+	//  ▼ テストコード ▼
+	// ------------------------------------------------------------
 	function test___construct_第一引数は省略可能() {
 		$model = new Model_Test();
 		$this->assertInstanceOf('Model_Base', $model);
