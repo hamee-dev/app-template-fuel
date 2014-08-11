@@ -67,6 +67,8 @@ class Test_Model_Base extends Test_Common
 	// ------------------------------------------------------------
 	//  ▼ テストコード ▼
 	// ------------------------------------------------------------
+
+	// __construct()
 	function test___construct_第一引数は省略可能() {
 		$model = new Model_Test();
 		$this->assertInstanceOf('Model_Base', $model);
@@ -83,9 +85,11 @@ class Test_Model_Base extends Test_Common
 		$this->assertEquals($model->c, 3);
 	}
 
+	// forge()
 	// FIXME: __constructをモック化してテストする方法が分からない
 	// function test_forge_内部で__constructが呼ばれる() {}
 
+	// isNew()
 	function test_isNew_まだDBに存在しないデータならtrueを返す() {
 		$model = new Model_Test();
 		$this->assertTrue($model->isNew());
@@ -95,6 +99,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertFalse($model->isNew());
 	}
 
+	// validate
 	function test_validate_内部でbefore_validateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_validate');
 		$mock->validate();
@@ -104,6 +109,7 @@ class Test_Model_Base extends Test_Common
 		$mock->validate();
 	}
 
+	// create
 	function test_create_内部でbefore_insertフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_insert');
 
@@ -135,6 +141,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertTrue(is_bool($model->insert()));
 	}
 
+	// update
 	function test_update_内部でbefore_updateフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_update');
 
@@ -173,6 +180,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertTrue(is_bool($model->update()));
 	}
 
+	// save()
 	function test_save_内部でbefore_saveフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'before_save');
 
@@ -186,6 +194,7 @@ class Test_Model_Base extends Test_Common
 		try { $mock->save(); } catch(Exception $e) {}
 	}
 
+	// delete()
 	function test_delete_内部でbefore_deleteフックが呼ばれる() {
 		$mock = $this->getHookMock('Model_Test', 'after_delete');
 		// NOTE: モックでインスタンスを生成するとクラス名が変わりテーブルがないと例外を投げられる。ので握りつぶし
@@ -211,6 +220,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertTrue(is_bool($model->delete()));
 	}
 
+	// find()
 	// FIXME: staticメソッドがコールされたかどうかのチェックの方法が分からない
 	// function test_find_after_findフックが呼ばれる() {}
 	// function test_find_after_findフックの戻り値がfindの戻り値になる() {}
@@ -227,6 +237,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertEquals($model, null);
 	}
 
+	// findBy()
 	function test_findBy_一致する条件があればModel_Baseのインスタンスの配列が返る() {
 		$result = Model_Test::findBy('content', 'Hoge');
 
@@ -243,6 +254,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertEmpty($result);
 	}
 
+	// findLike()
 	function test_findLike_部分一致で検索ができる() {
 		$target = Model_Test::findLike('content', 'H');
 
@@ -260,6 +272,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertEmpty($not_matched);
 	}
 
+	// count()
 	function test_count_引数を省略するとそのテーブル全件のデータ件数が取得できる() {
 		$rows = $this->getConnection()->getRowCount('tests');
 
@@ -274,11 +287,13 @@ class Test_Model_Base extends Test_Common
 		$this->assertEquals(0, $matched_row_count);
 	}
 
+	// transactionDo()
 	// FIXME: staticメソッドのコール確認の方法がわからない
 	// function test_transactionDo_トランザクションが実行されている() {}
 	// function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {}
 	// function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {}
 
+	// _getTableName()
 	// NOTE: クラス名->テーブル名の変換ルールについてはこちらを参照
 	// http://ne0.next-engine.org:10080/ld3sl/issues/6297#クラス名とテーブル名の命名規約
 	function test__getTableName_クラス名からModel_を取り除き小文字かつ複数形にした文字列が返却される() {
@@ -286,6 +301,7 @@ class Test_Model_Base extends Test_Common
 		$this->assertEquals('tests', $table_name);
 	}
 
+	// toArray()
 	function test_toArray_戻り値は連想配列() {
 		$model = new Model_Test();
 		$this->assertTrue(is_array($model->toArray()));
