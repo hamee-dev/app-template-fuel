@@ -1,20 +1,40 @@
 <?php
 
-require_once __DIR__.'/../usedb.php';
-
 // testsテーブルを用いてデータをDBに保存するテストを行うためのモデル
 class Model_Test extends Model_Base {
-	public $hoge = 1;
-	protected static $ignoreSaveKey = array('hoge');
+	public $int_column;
+	public $varchar_column;
+	public $test_column;
+	public $bigint_column;
+	public $bool_column;
 
-	public $content = null;
+	protected static $ignoreSaveKey = array();
 }
 
 /**
  * Model_Baseのテスト
  */
-class Test_Model_Base extends Usedb
+class Test_Model_Base extends Test_Common
 {
+	protected $restore_tables = array('tests');
+
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+
+		// テスト用DBを定義
+		\DBUtil::create_table('tests', array(
+			'id' 				=> array('constraint' => 11,  'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
+			'int_column'		=> array('type' => 'int'),
+			'varchar_column'	=> array('type' => 'varchar'),
+			'test_column'		=> array('type' => 'text'),
+			'bigint_column'		=> array('type' => 'bigint'),
+			'bool_column'		=> array('type' => 'tinyint'),
+			'updated_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')),
+			'created_at' 		=> array('type' => 'timestamp', 'default' => \DB::expr('CURRENT_TIMESTAMP')),
+
+		), array('id'), true, 'InnoDB');
+	}
+
 	/**
 	 * ユーティリティ
 	 */

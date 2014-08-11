@@ -21,3 +21,13 @@ users:
         email: inoue.shingo+stagingtest@hamee.co.jp
         access_token: a3fabb1b9bd2781b3646f53bb6b1a1ebed9067ca9317d9776c47b8bd3a9cec12083f00488682ec24e2ad1138cbfb281519bc612cc8c4195baee2bab7683bd33e
         refresh_token: 3c1031eaf90abe6be2e1bc63ae02f7bbd21f7f07380f844588e58bf2f63dcd7b3db1d6528d86a26860aca79443475a86a9c326c19572a6590dec59bbe408277e
+
+# テスト用のテーブル
+tests:
+    -
+        id: 1
+        int_column: 1
+        varchar_column: hogehoge
+        test_column: long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long text
+        bigint_column: 9223372036854775807
+        bool_column: false
