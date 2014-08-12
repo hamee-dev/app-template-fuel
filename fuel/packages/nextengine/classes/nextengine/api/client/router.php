@@ -118,7 +118,6 @@ class Client_Router extends Client
 		$user->email          = $user_info['pic_mail_address'];
 		$user->access_token   = $this->_access_token;
 		$user->refresh_token  = $this->_refresh_token;
-		$user->created_at     = \DB::expr('NOW()');
 
 		$user->save();	// INSERT or UPDATE
 
