@@ -222,7 +222,7 @@ abstract class Model_Base
 		$ret = $insert_or_update_query->execute();
 
 		$result = false;
-		if($ret[1] > 0) {
+		if($ret[1] >= 0) {	// NOTE: 0以上にしてデグらない？
 			$this->id = $ret[0];
 			$result = true;
 		}
