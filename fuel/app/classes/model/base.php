@@ -66,7 +66,6 @@ abstract class Model_Base
 	protected static $ignoreSaveKey = array(
 		'ignoreSaveKey',
 		'id',
-		'updated_at',
 		'created_at',
 		'primaryKey',
 		'validationErrors',
@@ -123,6 +122,7 @@ abstract class Model_Base
 		$this->hook('before_save');
 		$this->hook('before_insert');
 
+		$this->updated_at = \DB::expr('NOW()');
 		$query = DB::insert($table_name)->set($this->toArray());
 
 		if($insert_ignore) {
@@ -160,6 +160,8 @@ abstract class Model_Base
 	public function update() {
 		$this->hook('before_save');
 		$this->hook('before_update');
+
+		$this->updated_at = \DB::expr('NOW()');
 
 		$table_name = $this->_getTableName();
 		$query = DB::update($table_name)
@@ -206,6 +208,8 @@ abstract class Model_Base
 	 */
 	public function save() {
 		$this->hook('before_save');
+
+		$this->updated_at = \DB::expr('NOW()');
 
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
