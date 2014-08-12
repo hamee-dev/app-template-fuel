@@ -67,6 +67,7 @@ abstract class Model_Base
 		'ignoreSaveKey',
 		'id',
 		'updated_at',
+		'created_at',
 		'primaryKey',
 		'validationErrors',
 	);
