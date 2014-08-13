@@ -7,6 +7,7 @@
 - ssl
 - MySQL 5.6
 - PHP5.4
+- XDebug（不要なら消して下さい。）
 
 をVagrantfileに詰め込んであります。
 
