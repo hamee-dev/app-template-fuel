@@ -124,6 +124,8 @@ EOF
 
     # --- PHP
     yum install -y php php-pecl-apc php-cli php-pear php-pdo php-mysqlnd.x86_64 php-pgsql php-pecl-mongo php-sqlite php-pecl-memcache php-pecl-memcached php-gd php-mbstring php-mcrypt php-xml --enablerepo=remi
+    # --- PHP -> install XDebug
+    yum install -y php-pecl-xdebug.x86_64 --enablerepo=remi
     # --- PHP -> set default timezone(Asia/Tokyo)
     sed -i -e 's|;date.timezone =|date.timezone = '\''Asia/Tokyo'\''|' /etc/php.ini
 
