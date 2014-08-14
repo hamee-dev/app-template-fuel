@@ -428,6 +428,41 @@ abstract class Model_Base
 	}
 
 	// =======================================
+	// トランザクション
+	// =======================================
+	/**
+	 * INSERT, UPDATE, INSERT or UPDATE, DELETEを同一トランザクション配下で行う
+	 * NOTE: 同一アクション(insertやupdate)の中の順序は指定できるが、アクション自体の実行順は指定できないことに注意。
+	 *       必ずinsert(), update(), save(), delete()の順でモデルが存在するだけ実行される。
+	 * @param  Model_Base[] $inserts insert()を呼び出したいModel_Baseのインスタンスの配列 
+	 * @param  Model_Base[] $updates update()を呼び出したいModel_Baseのインスタンスの配列
+	 * @param  Model_Base[] $saves   save()を呼び出したいModel_Baseのインスタンスの配列
+	 * @param  Model_Base[] $deletes delete()を呼び出したいModel_Baseのインスタンスの配列
+	 * @return bool 全て成功すればtrue, どれか１つ以上が失敗したらfalse
+	 * @throws Database_Exception
+	 */
+	public function actionInTransaction(array $inserts, array $updates = array(), array $saves = array(), array $deletes = array()) {
+		$result = self::transactionDo(function() use ($inserts, $updates, $saves, $deletes) {
+			foreach($inserts as $insert_model) {
+				$insert_model->insert();
+			}
+			foreach($updates as $update_model) {
+				$update_model->update();
+			}
+			foreach($saves as $save_model) {
+				$save_model->save();
+			}
+			foreach($deletes as $delete_model) {
+				$delete_model->delete();
+			}
+
+			return true;
+		});
+
+		return $result;
+	}
+
+	// =======================================
 	// フック一覧(protected)
 	// =======================================
 
