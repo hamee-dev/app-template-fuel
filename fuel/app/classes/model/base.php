@@ -554,7 +554,7 @@ abstract class Model_Base
 	 *
 	 * @param Clusure $callback トランザクション内で実行する処理
 	 * @param mixed   $params   コールバック関数に渡す引数を可変長で受け取る
-	 * @return mixed コールバック関数の戻り値
+	 * @return mixed コールバック関数の戻り値、途中でcatchされたらfalse
 	 */
 	protected static function transactionDo($callback/*, $params... */) {
 		$params = array_slice(func_get_args(), 1);
@@ -567,7 +567,7 @@ abstract class Model_Base
 		} catch(Database_Exception $e) {
 			DB::rollback_transaction();
 			throw new Database_Exception($e);
-			$ret = null;
+			$ret = false;
 		}
 
 		return $ret;
