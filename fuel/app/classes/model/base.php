@@ -402,7 +402,7 @@ abstract class Model_Base
 			{
 				throw new \FuelException(get_called_class().'::count where statement must be an array or a closure.');
 			}
-			$query = $query->where($where);
+			$query = call_user_func_array(array($query, 'where'), $where);
 		}
 
 		if ( ! empty($group_by))
