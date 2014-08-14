@@ -441,7 +441,7 @@ abstract class Model_Base
 	 * @return bool 全て成功すればtrue, どれか１つ以上が失敗したらfalse
 	 * @throws Database_Exception
 	 */
-	public function actionInTransaction(array $inserts, array $updates = array(), array $saves = array(), array $deletes = array()) {
+	public static function actionInTransaction(array $inserts, array $updates = array(), array $saves = array(), array $deletes = array()) {
 		$result = self::transactionDo(function() use ($inserts, $updates, $saves, $deletes) {
 			foreach($inserts as $insert_model) {
 				$insert_model->insert();
