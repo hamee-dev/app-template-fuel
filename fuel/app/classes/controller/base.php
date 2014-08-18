@@ -29,7 +29,9 @@ abstract class Controller_Base extends Controller_Template
 
 	/**
 	 * アクセスされた情報から、表示言語をセットする
+	 * 
 	 * @param string $lang 'ja', 'en'などの言語を表す文字列
+	 * @return void
 	 */
 	private static function setLanguage($lang) {
 		Config::set('language', $lang);
@@ -38,6 +40,7 @@ abstract class Controller_Base extends Controller_Template
 	/**
 	 * 言語の設定、言語ファイルの読み込みを行う
 	 * ここに書いておくことで継承クラスは言語ファイルのロードを考慮せずコーディングできる
+	 * 
 	 * @return void
 	 */
 	public static function _init() {

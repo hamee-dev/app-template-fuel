@@ -90,6 +90,7 @@ abstract class Model_Base
 
 	/**
 	 * データの妥当性をチェックする。
+	 * 
 	 * @return boolean バリデーションに成功したらtrue。
 	 *                 エラーがあればfalseを返し、validationErrorsにエラーメッセージを格納する
 	 */
@@ -103,6 +104,7 @@ abstract class Model_Base
 
 	/**
 	 * DBに未挿入のデータか否かをチェックする。
+	 * 
 	 * @return bool DBに未挿入のデータならtrue、DBに挿入済みのデータならfalse
 	 */
 	public function isNew() {
@@ -111,8 +113,8 @@ abstract class Model_Base
 
 	/**
 	 * データをDBに挿入する。
+	 * NOTE: データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * 
-	 * ※データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * @param boolean $insert_ignore INSERT IGNOREを使用するか否か(trueなら使用、falseは不使用)
 	 * @return boolean
 	 */
@@ -153,8 +155,8 @@ abstract class Model_Base
 
 	/**
 	 * データのDB上の更新を行う。
+	 * NOTE: データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * 
-	 * ※データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * @return boolean
 	 */
 	public function update() {
@@ -180,6 +182,7 @@ abstract class Model_Base
 
 	/**
 	 * 物理削除(行をDB上から消す)を行う
+	 * 
 	 * @return boolean
 	 */
 	public function delete() {
@@ -237,6 +240,7 @@ abstract class Model_Base
 
 	/**
 	 * インスタンスを連想配列に変換する
+	 * 
 	 * @return array
 	 */
 	public function toArray() {
@@ -307,6 +311,7 @@ abstract class Model_Base
 
 	/**
 	 * 指定されたIDのデータのみ取得する
+	 * 
 	 * @param	int	$id 取得したいデータのID
 	 * @return mixed 指定されたIDが見つかればモデルのインスタンス、無ければnull
 	 */
@@ -329,6 +334,7 @@ abstract class Model_Base
 
 	/**
 	 * テーブル内のデータを全件取得する
+	 * 
 	 * @return array テーブル全行のデータをインスタンス化した要素の配列、１件もデータがない場合は空配列
 	 */
 	public static function findAll() {
@@ -343,6 +349,7 @@ abstract class Model_Base
 
 	/**
 	 * 条件を１つ指定しデータを取得する
+	 * 
 	 * @param  string $column	検索に使用するカラム名
 	 * @param  string $value	一致させたい値
 	 * @param  string $operator	使用する演算子(デフォルトは'=')
@@ -362,6 +369,7 @@ abstract class Model_Base
 
 	/**
 	 * LIKE演算子を利用してfindByを行う
+	 * 
 	 * @param	string	$column	検索に使用するカラム名
 	 * @param	string	$value	部分一致させたい値
 	 * @see findBy
@@ -434,6 +442,7 @@ abstract class Model_Base
 	 * INSERT, UPDATE, INSERT or UPDATE, DELETEを同一トランザクション配下で行う
 	 * NOTE: 同一アクション(insertやupdate)の中の順序は指定できるが、アクション自体の実行順は指定できないことに注意。
 	 *       必ずinsert(), update(), save(), delete()の順でモデルが存在するだけ実行される。
+	 * 
 	 * @param  Model_Base[] $inserts insert()を呼び出したいModel_Baseのインスタンスの配列 
 	 * @param  Model_Base[] $updates update()を呼び出したいModel_Baseのインスタンスの配列
 	 * @param  Model_Base[] $saves   save()を呼び出したいModel_Baseのインスタンスの配列
@@ -468,6 +477,7 @@ abstract class Model_Base
 
 	/**
 	 * バリデーションを行う実体部。ここをオーバーライドすれば任意のバリデーションを書ける
+	 * 
 	 * @return boolean
 	 */
 	protected function runValidate() {
@@ -477,6 +487,7 @@ abstract class Model_Base
 	/**
 	 * 挿入/更新処理の直前に実行できるフック
 	 * insert, update, saveメソッドでコールされる。
+	 * 
 	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
 	 * @return void
 	 */
@@ -485,6 +496,7 @@ abstract class Model_Base
 	/**
 	 * 挿入処理の直前に実行できるフック
 	 * insertメソッドでコールされる。
+	 * 
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
@@ -493,6 +505,7 @@ abstract class Model_Base
 	/**
 	 * 更新処理の直前に実行できるフック
 	 * updateメソッドでコールされる。
+	 * 
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
@@ -501,6 +514,7 @@ abstract class Model_Base
 	/**
 	 * 削除処理の直前に実行できるフック
 	 * deleteメソッドでコールされる。
+	 * 
 	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
@@ -509,6 +523,7 @@ abstract class Model_Base
 	/**
 	 * バリデーション処理の直前に実行できるフック
 	 * validateメソッドでコールされる。
+	 * 
 	 * @return void
 	 */
 	protected function before_validate() {}
@@ -518,6 +533,7 @@ abstract class Model_Base
 	 * find, findBy, findLikeでコールされる。
 	 * このメソッドの戻り値が、findメソッドの戻り値として使用されるので扱いに要注意。
 	 * このメソッドだけstaticなので要注意。
+	 * 
 	 * @param  mixed $record インスタンスの配列
 	 * @return array
 	 */
@@ -526,6 +542,7 @@ abstract class Model_Base
 	/**
 	 * 保存処理の直後に実行できるフック
 	 * insert, update, saveメソッドでコールされる。
+	 * 
 	 * @param  boolean $success 保存に成功したらtrue
 	 * @return void
 	 */
@@ -534,6 +551,7 @@ abstract class Model_Base
 	/**
 	 * 挿入処理の直後に実行できるフック
 	 * insertメソッドでコールされる。
+	 * 
 	 * @param  boolean $success 挿入に成功したらtrue
 	 * @return void
 	 */
@@ -542,6 +560,7 @@ abstract class Model_Base
 	/**
 	 * 更新処理の直後に実行できるフック
 	 * updateメソッドでコールされる。
+	 * 
 	 * @param  boolean $success 更新に成功したらtrue
 	 * @return void
 	 */
@@ -550,6 +569,7 @@ abstract class Model_Base
 	/**
 	 * 削除処理の直後に実行できるフック
 	 * deleteメソッドでコールされる。
+	 * 
 	 * @param  boolean $success 削除に成功したらtrue
 	 * @return void
 	 */
@@ -558,6 +578,7 @@ abstract class Model_Base
 	/**
 	 * バリデーション処理の直後に実行できるフック
 	 * validateメソッドでコールされる。
+	 * 
 	 * @param  boolean $success バリデーションに通過したらtrue
 	 * @return void
 	 */
@@ -565,6 +586,7 @@ abstract class Model_Base
 
 	/**
 	 * フックをコールするためのメソッド
+	 * 
 	 * @param  string $hook_name 実行するフック名
 	 * @param  mixed  $args      フックに渡す引数
 	 * @return mixed フックの戻り値
