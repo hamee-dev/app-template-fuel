@@ -22,18 +22,14 @@ class Client_Router extends Client
 	 */
 	public function authenticate($uid) {
 		// APIを１回は呼ばないと、アクセストークンとリフレッシュトークンが入手できない
-		$company = $this->_createCompany();
-		$users = \Model_User::findBy('uid', $this->_uid);
+		$company_info = $this->_fetchCompanyInfo();
+		$company = $this->_createCompany($company_info);
+		$company->save();	// INSERT or UPDATE
 
-		// uidに対応するユーザがいる場合、そのまま利用する
-		if(count($users) > 0) {
-			$user    = $users[0];
-
-		// uidに対応するユーザが居ない場合、APIを叩き認証を行う
-		} else {
-			// NOTE: fキー制約の都合でcompanyが先、elseと並び順が違うのは意図的。
-			$user    = $this->_createUser($company->id);
-		}
+		$user_info = $this->_fetchUserInfo();
+		$user = $this->_createUser($user_info);
+		$user->company_id = $company->id;
+		$user->save();		// INSERT or UPDATE
 
 		$this->setUser($user);
 		return array($company, $user);
@@ -93,15 +89,38 @@ class Client_Router extends Client
 	 * 
 	 * @return Model_Company 挿入(orDBから取得)したインスタンス
 	 */
-	private function _createCompany() {
+	private function _fetchCompanyInfo()
+	{
 		$company_info = parent::apiExecute('/api_v1_login_company/info');
 		$company_info = $company_info['data'][0];
 
+		return $company_info;
+	}
+
+	/**
+	 * NE APIからユーザ情報を取得するユーティリティ
+	 * 
+	 * @return array
+	 */
+	private function _fetchUserInfo()
+	{
+		$user_info = parent::apiExecute('/api_v1_login_user/info');
+		$user_info = $user_info['data'][0];
+
+		return $user_info;
+	}
+
+	/**
+	 * APIから情報を取得し企業データをDBに挿入する
+	 * 既にDBに企業データが存在している場合は、それを取得して返す。
+	 * 
+	 * @return Model_Company 挿入(orDBから取得)したインスタンス
+	 */
+	private function _createCompany(array $company_info)
+	{
 		$company = new \Model_Company();
 		$company->platform_id      = $company_info['company_ne_id'];
 		$company->main_function_id = $company_info['company_id'];
-
-		$company->save();	// INSERT or UPDATE
 
 		return $company;
 	}
@@ -113,19 +132,14 @@ class Client_Router extends Client
 	 * @param  int $company_id 所属している企業ID
 	 * @return Model_User 挿入(orDBから取得)したインスタンス
 	 */
-	private function _createUser($company_id) {
-		$user_info = parent::apiExecute('/api_v1_login_user/info');
-		$user_info = $user_info['data'][0];
-
+	private function _createUser(array $user_info)
+	{
 		$user = new \Model_User();
-		$user->company_id     = $company_id;
 		$user->uid            = $user_info['uid'];
 		$user->next_engine_id = $user_info['pic_ne_id'];
 		$user->email          = $user_info['pic_mail_address'];
 		$user->access_token   = $this->_access_token;
 		$user->refresh_token  = $this->_refresh_token;
-
-		$user->save();	// INSERT or UPDATE
 
 		return $user;
 	}
