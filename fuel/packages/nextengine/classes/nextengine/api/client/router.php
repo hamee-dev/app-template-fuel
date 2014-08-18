@@ -45,6 +45,10 @@ class Client_Router extends Client
 	 * ### 親クラスからの拡張点
 	 * 親クラスが例外を投げるだけなので、そいつをキャッチして例外コードに沿った具体的なアクションを追加
 	 *
+	 * @param string $code    エラーコード
+	 * @param string $message エラーメッセージ
+	 * @return void
+	 * @throws NextengineApiException
 	 */
 	protected function failover($code, $message) {
 		// 親クラスが例外を投げてくれるのでその詳細を解析する
@@ -86,6 +90,7 @@ class Client_Router extends Client
 	/**
 	 * APIから情報を取得し企業データをDBに挿入する
 	 * 既にDBに企業データが存在している場合は、それを取得して返す。
+	 * 
 	 * @return Model_Company 挿入(orDBから取得)したインスタンス
 	 */
 	private function _createCompany() {
@@ -104,6 +109,7 @@ class Client_Router extends Client
 	/**
 	 * APIから情報を取得しユーザデータをDBに挿入する
 	 * 既にDBにユーザデータが存在している場合は、アクセストークンとリフレッシュトークンのUPDATEをかける。
+	 * 
 	 * @param  int $company_id 所属している企業ID
 	 * @return Model_User 挿入(orDBから取得)したインスタンス
 	 */
