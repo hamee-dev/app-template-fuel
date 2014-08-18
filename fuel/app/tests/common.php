@@ -30,6 +30,8 @@ abstract class Test_Common extends TestCase
 	 * ## テスト開始時の初期化処理
 	 * テスト開始時にシードデータを読み込み、その結果をプロパティにキャッシュしておく
 	 * NOTE: PHPUnitの都合でこのクラスが継承されるたびに1回の初期化が起こるため、既に設定をロード済みならロードしないようにしている。
+	 * 
+	 * @return void
 	 */
 	public static function setUpBeforeClass()
 	{
@@ -49,6 +51,8 @@ abstract class Test_Common extends TestCase
 	 *     protected $restore_tables = array('items', 'companies');
 	 * }
 	 * ```
+	 * 
+	 * @return void
 	 */
 	public function setUp()
 	{
@@ -69,6 +73,7 @@ abstract class Test_Common extends TestCase
 	/**
 	 * $stepのデフォルトが50件なのは下記の記事に基づく情報。
 	 * PHP/MySQL でレコードを N 件ずつバルクインサート http://blog.yuyat.jp/archives/2018
+	 * 
 	 * @param string  $table 挿入を行うテーブル名
 	 * @param array[] $rows  挿入を行うデータの連想配列（シードから読み取った値を想定）
 	 * @param int     $step  一度に挿入する件数。デフォルトでは50件ずつ
