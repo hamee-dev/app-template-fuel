@@ -53,6 +53,7 @@ class User
 
 	/**
 	 * トークンのリフレッシュを行う実体部。
+	 * 
 	 * @param Model_User $user トークンを更新したいユーザオブジェクト
 	 * @return boolean 更新に成功したらtrue、更新が必要なかった場合もtrue
 	 */
