@@ -27,6 +27,7 @@ class Client extends \neApiClient
 
 	/**
 	 * 設定をロードし、_defaultsプロパティに格納しておく
+	 * 
 	 * @return void
 	 */
 	public static function _init()
@@ -49,6 +50,7 @@ class Client extends \neApiClient
 
 	/**
 	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
+	 * 
 	 * @param  array      $config 設定値（この値が優先される）
 	 * @return Nextengine\Api\Client
 	 */
@@ -104,6 +106,7 @@ class Client extends \neApiClient
 
 	/**
 	 * ユーザ情報をセットする
+	 * 
 	 * @param Model_User $user ユーザのインスタンス
 	 * @return void
 	 */
@@ -127,6 +130,7 @@ class Client extends \neApiClient
 
 	/**
 	 * ネクストエンジンAPIからエラーが返っていた場合の処理を行う
+	 * 
 	 * @param  string $code    NextengineApiExceptionに渡すエラーコード
 	 * @param  string $message NextengineApiExceptionに渡すエラーメッセージ
 	 * @return void
@@ -160,6 +164,7 @@ class Client extends \neApiClient
 
 	/**
 	 * 開発者にメールを送信する
+	 * 
 	 * @param  string $code
 	 * @param  string $message
 	 * @return boolean 送信に思考したらtrue
@@ -176,6 +181,7 @@ class Client extends \neApiClient
 
 	/**
 	 * 営業にメールを送信する
+	 * 
 	 * @param  string $code
 	 * @param  string $message
 	 * @return boolean 送信に思考したらtrue
@@ -191,6 +197,7 @@ class Client extends \neApiClient
 
 	/**
 	 * メール送信ユーティリティ
+	 * 
 	 * @param  string,array $to      宛先（配列で複数指定可能）
 	 * @param  string       $subject 件名
 	 * @param  string       $body    本文
