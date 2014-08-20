@@ -103,7 +103,8 @@ Sequel Pro等のGUIクライアントを使用する場合は、
 ```shell
 $ vagrant ssh
 
-[vagrant@vagrant-centos65 ~]$ php oil r migrate --packages=base
+[vagrant@vagrant-centos65 ~]$ cd /vagrant/
+[vagrant@vagrant-centos65 vagrant]$ php oil r migrate --packages=base
 ```
 
 ### 動作確認
