@@ -642,7 +642,7 @@ abstract class Model_Base
 	 * @return string クラス名を小文字かつ複数形にしたテーブル名
 	 */
 	protected static function _getTableName() {
-		$lower_class_name = strtolower(get_called_class());
+		$lower_class_name = \Inflector::denamespace(strtolower(get_called_class()));
 		$model_removed = \Str::sub($lower_class_name, strlen('model_'));
 		return \Inflector::pluralize($model_removed);
 	}
