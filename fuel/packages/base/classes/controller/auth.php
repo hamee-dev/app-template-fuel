@@ -81,12 +81,12 @@ abstract class Controller_Auth extends Controller_Base
 			\Response::redirect('/auth/login');
 		}
 
-		$company_info = $this->_fetchCompanyInfo();
-		$company = $this->_createCompany($company_info);
+		$company_info = $this->_fetch_company_info();
+		$company = $this->_create_company($company_info);
 		$company->save();	// INSERT or UPDATE
 
-		$user_info = $this->_fetchUserInfo();
-		$user = $this->_createUser($user_info, $company->id);
+		$user_info = $this->_fetch_user_info();
+		$user = $this->_create_user($user_info, $company->id);
 		$user->save();		// INSERT or UPDATE
 
 		// セッションにログインユーザの情報をセット
@@ -106,7 +106,7 @@ abstract class Controller_Auth extends Controller_Base
 	 * @param  array $company_info ログイン企業の情報（連想配列）
 	 * @return Model_Company プロパティに値をセットしたインスタンス
 	 */
-	protected function _createCompany(array $company_info)
+	protected function _create_company(array $company_info)
 	{
 		$company = new \Model_Company(array(
 			'platform_id'      => $company_info['company_ne_id'],
@@ -123,7 +123,7 @@ abstract class Controller_Auth extends Controller_Base
 	 * @param  int   $company_id 所属している企業ID
 	 * @return Model_User プロパティに値をセットしたインスタンス
 	 */
-	protected function _createUser(array $user_info, $company_id)
+	protected function _create_user(array $user_info, $company_id)
 	{
 		$user = new \Model_User(array(
 			'company_id'     => $company_id,
@@ -142,7 +142,7 @@ abstract class Controller_Auth extends Controller_Base
 	 * 
 	 * @return array 企業情報の連想配列。参照：http://api.next-e.jp/fields_login.php#company
 	 */
-	protected function _fetchCompanyInfo()
+	protected function _fetch_company_info()
 	{
 		$company_info = self::$client->apiExecute('/api_v1_login_company/info');
 		$company_info = $company_info['data'][0];
@@ -155,7 +155,7 @@ abstract class Controller_Auth extends Controller_Base
 	 * 
 	 * @return array ユーザ情報の連想配列。参照：http://api.next-e.jp/fields_login.php#pic
 	 */
-	protected function _fetchUserInfo()
+	protected function _fetch_user_info()
 	{
 		$user_info = self::$client->apiExecute('/api_v1_login_user/info');
 		$user_info = $user_info['data'][0];

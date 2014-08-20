@@ -62,9 +62,13 @@ class Controller_Auth extends \Base\Controller_Auth
 	 * @param  array $company_info ログイン企業の情報（連想配列）
 	 * @return Model_Company プロパティに値をセットしたインスタンス
 	 */
-	protected function _createCompany(array $company_info)
+	protected function _create_company(array $company_info)
 	{
-		$company = parent::_createCompany($company_info);
+		$company = parent::_create_company($company_info);
+
+		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
+		Debug::dump('compay');
+
 		return $company;
 	}
 
@@ -75,9 +79,13 @@ class Controller_Auth extends \Base\Controller_Auth
 	 * @param  int   $company_id 所属している企業ID
 	 * @return Model_User プロパティに値をセットしたインスタンス
 	 */
-	protected function _createUser(array $user_info, $company_id)
+	protected function _create_user(array $user_info, $company_id)
 	{
-		$user = parent::_createUser($user_info, $company_id);
+		$user = parent::_create_user($user_info, $company_id);
+
+		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
+		Debug::dump('user');
+
 		return $user;
 	}
 }
