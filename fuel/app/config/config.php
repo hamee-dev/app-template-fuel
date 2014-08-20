@@ -274,6 +274,7 @@ return array(
 		 */
 		'packages'  => array(
 			'email',
+			'base',
 			'nextengine',
 			//'orm',
 		),
