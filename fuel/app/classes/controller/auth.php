@@ -3,20 +3,6 @@
 class Controller_Auth extends \Base\Controller_Auth
 {
 	/**
-	 * route: [GET] /auth/login
-	 * 
-	 * ネクストエンジンAPIクライアントクラスの`neLogin`メソッドを呼び出す。  
-	 * neLoginの認証処理につきましては、SDKのドキュメントを御覧下さい。
-	 * http://api.next-e.jp/sdk.php#php
-	 * 
-	 * @return void
-	 */
-	public function get_login()
-	{
-		parent::get_login();
-	}
-
-	/**
 	 * route: [GET] /auth/logout
 	 * 
 	 * 現在のセッションを破棄し、リダイレクトを行う
