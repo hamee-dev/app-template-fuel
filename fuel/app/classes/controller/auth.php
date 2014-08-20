@@ -53,7 +53,6 @@ class Controller_Auth extends \Base\Controller_Auth
 		$company = parent::_create_company($company_info);
 
 		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
-		Debug::dump('compay');
 
 		return $company;
 	}
@@ -70,7 +69,6 @@ class Controller_Auth extends \Base\Controller_Auth
 		$user = parent::_create_user($user_info, $company_id);
 
 		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
-		Debug::dump('user');
 
 		return $user;
 	}
