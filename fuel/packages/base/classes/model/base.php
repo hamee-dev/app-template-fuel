@@ -1,4 +1,9 @@
 <?php
+/**
+ * @author Shingo Inoue<inoue.shingo@hamee.co.jp>
+ */
+
+namespace Base;
 
 /**
  * アプリのベースとなるモデルクラス。全てのモデルクラスの基点はこのクラスとなる。
@@ -32,19 +37,19 @@ abstract class Model_Base
 	 * カラムのID
 	 * @var string
 	 */
-	public $id = null;
+	public $id;
 
 	/**
 	 * DBへの挿入日時
 	 * @var string
 	 */
-	public $created_at = null;
+	public $created_at;
 
 	/**
 	 * データの更新日時
 	 * @var string
 	 */
-	public $updated_at = null;
+	public $updated_at;
 
 	/**
 	 * findで比較に用いる主キー
@@ -125,15 +130,15 @@ abstract class Model_Base
 		$this->hook('before_insert');
 
 		$this->updated_at = \DB::expr('NOW()');
-		$query = DB::insert($table_name)->set($this->toArray());
+		$query = \DB::insert($table_name)->set($this->toArray());
 
 		if($insert_ignore) {
 			// NOTE: FuelPHPにINSERT IGNOREをサポートする機能が存在しないため、SQLを置き換える方法で実装。
 			$current_sql = $query->compile();
 
 			// SQLが'INSERT'もしくは'insert'で始まっていたら、'INSERT IGNORE'に置き換える。
-			if(Str::starts_with($current_sql, 'INSERT', true)) {
-				$query = DB::query('INSERT IGNORE'.Str::sub($current_sql, 6), DB::INSERT);
+			if(\Str::starts_with($current_sql, 'INSERT', true)) {
+				$query = \DB::query('INSERT IGNORE'.\Str::sub($current_sql, 6), \DB::INSERT);
 			}
 		}
 
@@ -166,7 +171,7 @@ abstract class Model_Base
 		$this->updated_at = \DB::expr('NOW()');
 
 		$table_name = $this->_getTableName();
-		$query = DB::update($table_name)
+		$query = \DB::update($table_name)
 					->set($this->toArray())
 					->where(self::$primaryKey, $this->{self::$primaryKey});
 
@@ -189,7 +194,7 @@ abstract class Model_Base
 		$this->hook('before_delete');
 
 		$table_name = $this->_getTableName();
-		$query = DB::delete($table_name)->where(static::$primaryKey, $this->{static::$primaryKey});
+		$query = \DB::delete($table_name)->where(static::$primaryKey, $this->{static::$primaryKey});
 
 		// NOTE: $retがintなら削除された行数（成功）、NULLなら失敗
 		$ret = $query->execute();
@@ -216,15 +221,15 @@ abstract class Model_Base
 
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
-		$query = DB::insert($this->_getTableName())->set($this->toArray());
+		$query = \DB::insert($this->_getTableName())->set($this->toArray());
 
 		// ON DUPLICATE KEY UPDATE以降で更新する値を、自前でなくクエリビルダを利用して生成する
 		// FIXME: かなりゴリ押し。テーブル名が大文字でSETとかだった場合にバグります。
-		$update_sql    = DB::update($this->_getTableName())->set($this->toArray())->compile();
+		$update_sql    = \DB::update($this->_getTableName())->set($this->toArray())->compile();
 		$set_pos       = mb_strpos($update_sql, ' SET ');
 		$after_set_sql = mb_substr($update_sql, $set_pos + 5);	// ' SET 'の3文字を読み飛ばす
 
-		$insert_or_update_query = DB::query($query->compile().' ON DUPLICATE KEY UPDATE '.$after_set_sql);
+		$insert_or_update_query = \DB::query($query->compile().' ON DUPLICATE KEY UPDATE '.$after_set_sql);
 
 		$ret = $insert_or_update_query->execute();
 
@@ -317,7 +322,7 @@ abstract class Model_Base
 	 */
 	public static function find($id) {
 		$table_name = (new static())->_getTableName();
-		$query = DB::select()
+		$query = \DB::select()
 					->from($table_name)
 					->where(static::$primaryKey, $id)
 					->limit(1)
@@ -339,7 +344,7 @@ abstract class Model_Base
 	 */
 	public static function findAll() {
 		$table_name = (new static())->_getTableName();
-		$query = DB::select()
+		$query = \DB::select()
 					->from($table_name)
 					->as_object(get_called_class());
 
@@ -357,7 +362,7 @@ abstract class Model_Base
 	 */
 	public static function findBy($column, $value, $operator = '=') {
 		$table_name = (new static())->_getTableName();
-		$query = DB::select()
+		$query = \DB::select()
 					->from($table_name)
 					->where($column, $operator, $value)
 					->as_object(get_called_class());
@@ -617,13 +622,13 @@ abstract class Model_Base
 		$params = array_slice(func_get_args(), 1);
 
 		try {
-			DB::start_transaction();
+			\DB::start_transaction();
 			$ret = call_user_func_array($callback, $params);
-			DB::commit_transaction();
+			\DB::commit_transaction();
 
 		} catch(Database_Exception $e) {
-			DB::rollback_transaction();
-			throw new Database_Exception($e);
+			\DB::rollback_transaction();
+			throw new \Database_Exception($e);
 			$ret = false;
 		}
 
@@ -638,7 +643,7 @@ abstract class Model_Base
 	 */
 	protected static function _getTableName() {
 		$lower_class_name = strtolower(get_called_class());
-		$model_removed = Str::sub($lower_class_name, strlen('model_'));
-		return Inflector::pluralize($model_removed);
+		$model_removed = \Str::sub($lower_class_name, strlen('model_'));
+		return \Inflector::pluralize($model_removed);
 	}
 }

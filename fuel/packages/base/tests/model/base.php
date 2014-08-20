@@ -3,7 +3,7 @@
 require_once __DIR__.'/../common.php';
 
 // testsテーブルを用いてデータをDBに保存するテストを行うためのモデル
-class Model_Test extends Model_Base {
+class Model_Test extends \Base\Model_Base {
 	public $int_column;
 	public $varchar_column;
 	public $test_column;
@@ -25,7 +25,7 @@ class Model_Test extends Model_Base {
 /**
  * Model_Baseのテスト
  */
-class Test_Model_Base extends Test_Common
+class Test_Model_Base extends \Test_Common
 {
 	protected $restore_tables = array('tests');
 

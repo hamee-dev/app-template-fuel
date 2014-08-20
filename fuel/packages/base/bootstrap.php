@@ -8,6 +8,10 @@ Autoloader::add_classes(array(
 	'Base\\Controller_Error' => __DIR__ . '/classes/controller/error.php',
 	'Base\\Controller_Neapi' => __DIR__ . '/classes/controller/neapi.php',
 
-	'Base\\Logger'          => __DIR__ . '/classes/logger.php',
+	'Base\\Model_Base'       => __DIR__ . '/classes/model/base.php',
+	'Base\\Model_User'       => __DIR__ . '/classes/model/user.php',
+	'Base\\Model_Company'    => __DIR__ . '/classes/model/company.php',
+
+	'Base\\Logger'           => __DIR__ . '/classes/logger.php',
 
 ));
