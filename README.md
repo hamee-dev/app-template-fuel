@@ -95,20 +95,35 @@ Sequel Pro等のGUIクライアントを使用する場合は、
 
 と設定して下さい。
 
-#### マイグレーションを実行
+### 動作確認
+ブラウザから`https://192.168.33.10`にアクセスするとWelcomeページが見られます。
 
+`https://192.168.33.10/auth/login`にアクセスして、  
+「Authenticate complete!!」と出力されれば、DBの接続確認および、FuelPHPの動作確認は完了です。
+
+## マイグレーション
+
+### アプリ独自のマイグレーションの作成
+基盤として提供しているマイグレーションは、  
+`base`パッケージの中の`migrations`ディレクトリに入っています。  
+
+基盤として提供されているマイグレーションからカラムを追加したり削除を行う場合には、  
+`fuel/packages/base/migrations`ではなく、`fuel/app/migrations`にマイグレーションファイルを作成して下さい。
+
+> ※ `$ php oil g migration ***...`と記述すれば自動で`fuel/app/migrations`に作成されるため、特に問題はないかと思います。
+
+### マイグレーションを実行
 マイグレーションは`base`パッケージの中に入っているため、  
 通常のマイグレーションではなく`--packages`オプションをつけて実行します。
+
+また、アプリ独自のマイグレーションを作成した場合には、  
+**baseパッケージのマイグレーションを実行した後に、`--packages`オプション無しで** マイグレーションを実行します
 
 ```shell
 $ vagrant ssh
 
 [vagrant@vagrant-centos65 ~]$ cd /vagrant/
 [vagrant@vagrant-centos65 vagrant]$ php oil r migrate --packages=base
+[vagrant@vagrant-centos65 vagrant]$ php oil r migrate
 ```
 
-### 動作確認
-ブラウザから`https://192.168.33.10`にアクセスするとWelcomeページが見られます。
-
-`https://192.168.33.10/auth/login`にアクセスして、  
-「Authenticate complete!!」と出力されれば、DBの接続確認および、FuelPHPの動作確認は完了です。
