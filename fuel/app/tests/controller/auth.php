@@ -1,15 +1,18 @@
 <?php
 
+
+require_once __DIR__.'/../common.php';
 require_once __DIR__.'/base.php';
-require_once __DIR__.'/../usedb.php';
 
 /**
  * Controller_Authのテスト
  */
-class Test_Controller_Auth extends Usedb
+class Test_Controller_Auth extends Test_Common
 {
 	// 言語の設定をリセット
 	public function setUp() {
+		parent::setUp();
+
 		// CLIだとundefined indexと言われるので明示的にnullを設定
 		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = null;
 

@@ -5,7 +5,7 @@ require_once __DIR__.'/../client.php';
 /**
  * Nextengine_Api_Client_Routerのテスト
  */
-class Test_Nextengine_Api_Client_Router extends Test_Nextengine_Api_Client
+class Test_Nextengine_Api_Client_Router extends Test_Common
 {
 	private function getClient() {
 		$user = Model_User::find(1);

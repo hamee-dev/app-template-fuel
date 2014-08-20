@@ -1,14 +1,16 @@
 <?php
 
+require_once __DIR__.'/../common.php';
 require_once __DIR__.'/base.php';
-require_once __DIR__.'/../usedb.php';
 
 /**
  * Controller_Neapiのテスト
  */
-class Test_Controller_Neapi extends Usedb
+class Test_Controller_Neapi extends Test_Common
 {
 	function setUp() {
+		parent::setUp();
+
 		// CLIだとundefined indexと言われるので明示的にnullを設定
 		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = null;
 

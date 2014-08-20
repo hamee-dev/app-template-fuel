@@ -1,12 +1,16 @@
 <?php
 
+require_once __DIR__.'/../common.php';
+
 /**
  * Controller_Baseのテスト
  */
-class Test_Controller_Base extends PHPUnit_Framework_TestCase
+class Test_Controller_Base extends Test_Common
 {
 	// 言語の設定をリセット
 	public function setUp() {
+		parent::setUp();
+
 		// CLIだとundefined indexと言われるので明示的にnullを設定
 		$_SERVER['HTTP_ACCEPT_LANGUAGE'] = null;
 

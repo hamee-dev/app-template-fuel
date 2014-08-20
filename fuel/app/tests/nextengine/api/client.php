@@ -3,7 +3,7 @@
 /**
  * Nextengine_Api_Clientのテスト
  */
-class Test_Nextengine_Api_Client extends Test_Model_Base
+class Test_Nextengine_Api_Client extends Test_Common
 {
 	protected function getMethod($class, $method) {
 		$ref = new ReflectionClass($class);
