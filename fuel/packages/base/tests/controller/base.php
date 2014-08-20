@@ -18,11 +18,7 @@ class Test_Controller_Base extends Test_Common
 	}
 
 	private function getGetLocale() {
-		$ref = new ReflectionClass('Controller_Base');
-		$getLocale = $ref->getMethod('getLocale');
-		$getLocale->setAccessible(true);
-
-		return $getLocale;
+		return parent::getMethod('Controller_Base', 'getLocale');
 	}
 	public function test_getLocale_カンマ区切りも文字列が与えられても先頭の２文字だけ見る() {
 		$expected = 'ja';
