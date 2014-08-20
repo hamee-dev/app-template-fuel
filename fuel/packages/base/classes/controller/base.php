@@ -1,16 +1,21 @@
 <?php
+/**
+ * @author Shingo Inoue<inoue.shingo@hamee.co.jp>
+ */
+
+namespace Base;
 
 /**
  * コントローラの基底クラス。
  * 全画面で共通処理として必要な言語ファイルのロード、表示言語のセットを行う。
  * 
- * NOTE: 継承クラスで別途_initの処理を書きたくなった際には、「必ず」parent::_initをコールして下さい。
- *       こいつを呼んでもらえないと言語ファイルのロードが出来ません。
+ * NOTE: Controllerとコアと同名のクラスにするとこちらが先にロードされてしまうのでControllerという命名を避けている
  */
-abstract class Controller_Base extends Controller_Template
+abstract class Controller_Base extends \Controller_Template
 {
 	/**
 	 * アクセスされたユーザの言語ロケールを取得する
+	 * 
 	 * 複数指定されている場合は、もっとも先頭に指定されている言語を返却します。  
 	 * 先頭の２文字だけを見るので、３文字以上の言語略称が現れた場合にはバグります。直して下さい。
 	 * 
@@ -24,31 +29,26 @@ abstract class Controller_Base extends Controller_Template
 	 */
 	private static function getLocale($raw_locale) {
 		$locales = explode(',', $raw_locale);
-		return Str::sub(trim($locales[0]), 0, 2);
-	}
-
-	/**
-	 * アクセスされた情報から、表示言語をセットする
-	 * 
-	 * @param string $lang 'ja', 'en'などの言語を表す文字列
-	 * @return void
-	 */
-	private static function setLanguage($lang) {
-		Config::set('language', $lang);
+		return \Str::sub(trim($locales[0]), 0, 2);
 	}
 
 	/**
 	 * 言語の設定、言語ファイルの読み込みを行う
+	 * 
 	 * ここに書いておくことで継承クラスは言語ファイルのロードを考慮せずコーディングできる
+	 * このクラスを継承したクラスで_initを定義したい場合には、"必ず"parent::_init()をコールして下さい
 	 * 
 	 * @return void
 	 */
 	public static function _init() {
-		self::setLanguage(self::getLocale($_SERVER['HTTP_ACCEPT_LANGUAGE']));
+		// 言語のセット
+		$locale = self::getLocale($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		\Config::set('language', $locale);
 
-		Lang::load('common.yml', 'common');
-		Lang::load('model.yml', 'model');
-		Lang::load('page.yml', 'page');
-		Lang::load('message.yml', 'message');
+		// 言語ファイルのロード
+		\Lang::load('common.yml', 'common');
+		\Lang::load('model.yml', 'model');
+		\Lang::load('page.yml', 'page');
+		\Lang::load('message.yml', 'message');
 	}
 }

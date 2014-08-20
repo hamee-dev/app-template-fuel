@@ -1,76 +1,75 @@
 <?php
 
-class Controller_Auth extends Controller_Base {
-	private static $client;
-
-	public static function _init()
-	{
-		parent::_init();
-
-		// NOTE: 認証画面ではコンストラクタに何も渡せない（login時には何も渡せるものがないので、ナシで統一）
-		self::$client = new Nextengine\Api\Client_Router();
-	}
-
+class Controller_Auth extends \Base\Controller_Auth
+{
 	/**
-	 * route: /auth/login
+	 * route: [GET] /auth/logout
 	 * 
-	 * ネクストエンジンAPIクライアントクラスの`neLogin`メソッドを呼び出す。  
-	 * neLoginの認証処理につきましては、SDKのドキュメントを御覧下さい。
-	 * http://api.next-e.jp/sdk.php#php
+	 * 現在のセッションを破棄し、リダイレクトを行う
+	 * 
+	 * @return void
 	 */
-	public function action_login()
+	public function get_logout()
 	{
-		self::$client->neLogin();
+		parent::get_logout();
+		\Response::redirect('/');
 	}
 
 	/**
-	 * route: /auth/logout
-	 */
-	public function action_logout()
-	{
-		Session::destroy();
-		Response::redirect('/');
-	}
-
-	/**
-	 * route: /auth/callback
+	 * route: [GET] /auth/callback
+	 * 
 	 * ネクストエンジンAPIの認証が済むとリダイレクトされるメソッドです。
 	 * セッションやGETパラメータの値を見て、認証済みのデータをDBとセッションに保存します。
+	 * 
+	 * @return void
 	 */
-	public function action_callback()
+	public function get_callback()
 	{
-		// NOTE: 可読性と関数呼び出しのオーバーヘッド軽減のため、結果を変数にキャッシュ
-		$session_user = Session::get('account.user');
-		$get_uid      = Input::get('uid');
-		$get_state    = Input::get('state');
-
-		// セッションもURLにも何もない = 通常操作では起こりえない非正規ルートなので再認証させる
-		if(is_null($get_uid) && is_null($get_state) && is_null($session_user)) {
-			Response::redirect('/demo/auth/login');
-		}
-
-		// セッションがある = 既にログイン済みなのでセッションのuidを使って認証
-		// URLに何がついてようといなかろうと、セッションの値を使っている。
-		if(!is_null($session_user)) {
-			list($company, $user) = self::$client->authenticate($session_user->uid);
-		} else {
-			// セッションがなくURLにuidとstateが渡っていたら、URLのuidを使って認証
-			// NOTE: GETがない場合は弾いているので、GETパラメータがある前提でOK
-			list($company, $user) = self::$client->authenticate($get_uid);
-		}
-
-		// セッションにログインユーザの情報をセット
-		$company_key = Config::get('session.keys.ACCOUNT_COMPANY');
-		$user_key = Config::get('session.keys.ACCOUNT_USER');
-		Session::set($company_key, $company);
-		Session::set($user_key, $user);
+		parent::get_callback();
 
 		// NOTE: 動作デモを試したら、コメントアウトを解除して任意の場所へリダイレクトさせて下さい。
 		//       http://api.next-e.jp/secret/sample-fuelphp/about-sample.php
-		// Response::redirect('/demo/api/find');
+		// \Response::redirect('/demo/api/find');
 
-		// NOTE: 上記を編集しリダイレクトさせる場合には下記の記述は不要です。
+		// NOTE: 上記を編集しリダイレクトさせる場合には下記の記述は不要です。消して下さい。
 		$this->template->title = 'Authenticate complete!!';
 		$this->template->content = "";
+	}
+
+
+	// ------------------------------------------------------------------------
+	//  ▼ ユーティリティ ▼
+	// ------------------------------------------------------------------------
+
+	/**
+	 * APIから取得した情報を元にCompanyモデルを作成し返却する
+	 * 既にDBに企業データが存在している場合は、それを取得して返す。
+	 * 
+	 * @param  array $company_info ログイン企業の情報（連想配列）
+	 * @return Model_Company プロパティに値をセットしたインスタンス
+	 */
+	protected function _create_company(array $company_info)
+	{
+		$company = parent::_create_company($company_info);
+
+		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
+
+		return $company;
+	}
+
+	/**
+	 * APIから取得した情報を元にUserモデルを作成し返却する
+	 * 
+	 * @param  array $user_info  ログインユーザの情報（連想配列）
+	 * @param  int   $company_id 所属している企業ID
+	 * @return Model_User プロパティに値をセットしたインスタンス
+	 */
+	protected function _create_user(array $user_info, $company_id)
+	{
+		$user = parent::_create_user($user_info, $company_id);
+
+		// NOTE: ここに任意のパラメータを入れ込む処理を記述できます。
+
+		return $user;
 	}
 }
