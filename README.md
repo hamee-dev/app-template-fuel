@@ -95,6 +95,18 @@ Sequel Pro等のGUIクライアントを使用する場合は、
 
 と設定して下さい。
 
+#### マイグレーションを実行
+
+マイグレーションは`base`パッケージの中に入っているため、  
+通常のマイグレーションではなく`--packages`オプションをつけて実行します。
+
+```shell
+$ vagrant ssh
+
+[vagrant@vagrant-centos65 ~]$ cd /vagrant/
+[vagrant@vagrant-centos65 vagrant]$ php oil r migrate --packages=base
+```
+
 ### 動作確認
 ブラウザから`https://192.168.33.10`にアクセスするとWelcomeページが見られます。
 
