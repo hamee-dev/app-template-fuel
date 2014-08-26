@@ -15,7 +15,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # using a specific IP.
   config.vm.network "private_network", ip: "192.168.33.10"
 
-  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant", mount_options: ['dmode=777','fmode=755']
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
