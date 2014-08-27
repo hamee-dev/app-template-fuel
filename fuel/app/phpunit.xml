@@ -11,10 +11,10 @@
 	</php>
 	<testsuites>
 		<testsuite name="packages">
-			<directory suffix=".php">../packages/*/tests</directory>
+			<directory suffix=".php">../packages/base/tests/model</directory>
 		</testsuite>
 		<testsuite name="app">
-			<directory suffix=".php">../app/tests</directory>
+			<!-- <directory suffix=".php">../app/tests</directory> -->
 		</testsuite>
 	</testsuites>
 
