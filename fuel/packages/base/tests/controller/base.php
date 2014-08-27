@@ -18,7 +18,7 @@ class Test_Controller_Base extends Test_Common
 	}
 
 	private function getGetLocale() {
-		return parent::getMethod('Controller_Base', 'getLocale');
+		return parent::getMethod('\Base\Controller_Base', 'getLocale');
 	}
 	public function test_getLocale_カンマ区切りも文字列が与えられても先頭の２文字だけ見る() {
 		$expected = 'ja';
