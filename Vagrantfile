@@ -114,7 +114,7 @@ EOF
     rm -rf /usr/share/nginx/html
     ln -fs /vagrant/public /usr/share/nginx/html
     # --- Nginx -> set ssl server config
-    sudo sh -c 'echo "#{ssl_conf}" > /etc/nginx/conf.d/ssl.conf'
+    sh -c 'echo "#{ssl_conf}" > /etc/nginx/conf.d/ssl.conf'
     # --- Nginx -> create log files
     touch /var/log/nginx/localhost.access.log
     touch /var/log/nginx/localhost.error.log
@@ -135,7 +135,7 @@ EOF
     yum install -y ntpdate.x86_64
     ntpdate ntp.nict.jp
     # --- Date -> MySQL date config
-    sudo sed "s/\[mysqld\]/[mysqld]\ndefault-time-zone='+9:00'/" /etc/my.cnf -i
+    sed "s/\[mysqld\]/[mysqld]\ndefault-time-zone='+9:00'/" /etc/my.cnf -i
 
     # --- setup
     service nginx start
@@ -148,9 +148,7 @@ EOF
     chkconfig --add php-fpm
     chkconfig --levels 235 php-fpm on
 
-    chkconfig --add php-fpm
-
-    sudo service mysql start
+    service mysql start
     echo
     echo "=== INFO: please login('vagrant ssh') and run 'mysql_secure_installation' initial password:"
     cat /root/.mysql_secret
