@@ -20,6 +20,11 @@ class Model_Test extends \Base\Model_Base {
 	protected function after_update($success) {}
 	protected function after_save($success) {}
 	protected function after_delete($success) {}
+
+	// NOTE: protectedなtransactionDoを貫通させるためのメソッド
+	public static function throutghTransactionDo($callback) {
+		return self::transactionDo($callback);
+	}
 }
 
 /**
@@ -171,6 +176,33 @@ class Test_Model_Base extends \Test_Common
 
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
+	}
+	function test_insert_第一引数にtrueを与えるとINSERT_IGNOREのSQLが発行される() {
+		$company = new \Model_Company();
+		$company->main_function_id = 'xxxxxxxxxx';
+		$company->platform_id      = 'xxxxxxxxxx';
+
+		$company->insert(true);
+		$this->assertStringStartsWith('INSERT IGNORE', \DB::last_query());
+	}
+	function test_insert_第一引数にtrueを与え_DBにあるデータと重複するモデルを挿入しようとしても例外をスローしない() {
+		$original = \Model_Company::find(1);
+
+		$copy = new \Model_Company();
+		$copy->main_function_id = $original->main_function_id;
+		$copy->platform_id      = 'xxxxxxxxxx';
+
+		$copy->insert(true);
+	}
+	function test_insert_第一引数にfalseを与え_DBにあるデータと重複するモデルを挿入しようとすると例外をスローする() {
+		$original = \Model_Company::find(1);
+
+		$copy = new \Model_Company();
+		$copy->main_function_id = $original->main_function_id;
+		$copy->platform_id      = 'xxxxxxxxxx';
+
+		$this->setExpectedException('\Database_Exception');
+		$copy->insert(false);
 	}
 
 	// update()
