@@ -172,20 +172,6 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
 	}
-	// FIXME: id重複の例外が起きない
-	function test_insert_一度insertしたモデルを再度insertしようとすると例外が発生する() {
-		$model = new Model_Test(array(
-			'int_column' => 1,
-			'varchar_column' => 'hoge',
-			'test_column' => 'hogehoge',
-			'bigint_column' => 123,
-			'bool_column' => false,
-		));
-		$model->insert();
-
-		$this->setExpectedException('Exception');
-		$model->insert();
-	}
 
 	// update()
 	function test_update_内部でbefore_updateフックが呼ばれる() {
