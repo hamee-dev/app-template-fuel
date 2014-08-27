@@ -145,6 +145,8 @@ EOF
 
     chkconfig --add nginx
     chkconfig --levels 235 nginx on
+    chkconfig --add php-fpm
+    chkconfig --levels 235 php-fpm on
 
     chkconfig --add php-fpm
 
