@@ -27,7 +27,7 @@ class Model_Test extends \Base\Model_Base {
  */
 class Test_Model_Base extends \Test_Common
 {
-	protected $restore_tables = array('tests');
+	protected $restore_tables = array('tests', 'users', 'companies');
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
@@ -276,6 +276,30 @@ class Test_Model_Base extends \Test_Common
 
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
+	}
+	function test_save_UNIQUEキーがDBに存在するデータと重複するモデルをsaveすると更新になる() {
+		$company = \Model_Company::find(1);
+		$company->platform_id = 'hogehogehoge';
+
+		$before_save_count = \Model_Company::count();
+		$company->save();
+		$after_save_count = \Model_Company::count();
+
+		$this->assertEquals($before_save_count, $after_save_count);
+		$this->assertEquals(\Model_Company::find(1)->platform_id, $company->platform_id);
+	}
+	function test_save_UNIQUEキーがDBに存在するデータと重複しないモデルをsaveすると挿入になる() {
+		// NOTE: UNIQUEな要素を書き換えてしまって重複が起きなくなった場合も同様なのでそちらで再現
+		$id = 1;
+		$company = \Model_Company::find($id);
+		$company->main_function_id = 'hogehogehoge';	// NOTE: main_function_idはUNIQUE
+
+		$before_save_count = \Model_Company::count();
+		$company->save();
+		$after_save_count = \Model_Company::count();
+
+		$this->assertTrue($before_save_count !== $after_save_count);
+		$this->assertTrue($id !== $company->id);
 	}
 
 	// delete()
