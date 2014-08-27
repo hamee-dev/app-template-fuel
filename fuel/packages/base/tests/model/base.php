@@ -80,7 +80,7 @@ class Test_Model_Base extends \Test_Common
 	// __construct()
 	function test___construct_第一引数は省略可能() {
 		$model = new Model_Test();
-		$this->assertInstanceOf('Model_Base', $model);
+		$this->assertInstanceOf('Model_Test', $model);
 	}
 	function test___construct_第一引数に連想配列を渡すとそのキーと値がプロパティに設定される() {
 		$model = new Model_Test(array(
