@@ -231,6 +231,19 @@ class Test_Model_Base extends \Test_Common
 		$model = new Model_Test();
 		$this->assertTrue(is_bool($model->update()));
 	}
+	function test_update_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
+		$models = Model_Test::findAll();
+		$model = $models[0];
+
+		$model->varchar_column = 'rewrite from test';
+		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
+		$model->update();
+
+		$updated_model = Model_Test::find($model->id);
+
+		$this->assertEquals($model->created_at, $updated_model->created_at);
+		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
+	}
 
 	// save()
 	function test_save_内部でbefore_saveフックが呼ばれる() {
@@ -263,19 +276,6 @@ class Test_Model_Base extends \Test_Common
 
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
-	}
-	function test_update_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
-		$models = Model_Test::findAll();
-		$model = $models[0];
-
-		$model->varchar_column = 'rewrite from test';
-		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
-		$model->update();
-
-		$updated_model = Model_Test::find($model->id);
-
-		$this->assertEquals($model->created_at, $updated_model->created_at);
-		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
 	}
 
 	// delete()
