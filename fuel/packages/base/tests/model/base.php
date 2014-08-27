@@ -209,7 +209,7 @@ class Test_Model_Base extends \Test_Common
 		$model->varchar_column = 'rewrite from test!!';
 		$model->update();
 
-		$this->assertEquals($model, Model_Test::find(1));
+		$this->assertEquals($model->varchar_column, Model_Test::find(1)->varchar_column);
 	}
 	function test_update_updated_atは更新され_created_atは更新されない() {
 		$models = Model_Test::findAll();
