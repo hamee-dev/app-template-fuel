@@ -365,7 +365,7 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($rows, $all_row_count);
 	}
 	function test_count_存在しない条件を与えると戻り値はゼロ() {
-		$not_exist_condition = array(array('id', '=', 10000));
+		$not_exist_condition = array('id', '=', 10000);
 		// NOTE: false=重複行も１行ずつカウントする
 		$matched_row_count = Model_Test::count('id', false, $not_exist_condition);
 
