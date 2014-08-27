@@ -264,13 +264,13 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
 	}
-	function test_save_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
+	function test_update_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
 		$models = Model_Test::findAll();
 		$model = $models[0];
 
 		$model->varchar_column = 'rewrite from test';
 		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
-		$model->save();
+		$model->update();
 
 		$updated_model = Model_Test::find($model->id);
 
