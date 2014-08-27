@@ -632,7 +632,7 @@ abstract class Model_Base
 			$ret = call_user_func_array($callback, $params);
 			\DB::commit_transaction();
 
-		} catch(Database_Exception $e) {
+		} catch(\Database_Exception $e) {
 			\DB::rollback_transaction();
 			throw new \Database_Exception($e);
 			$ret = false;

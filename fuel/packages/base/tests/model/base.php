@@ -429,10 +429,48 @@ class Test_Model_Base extends \Test_Common
 	}
 
 	// transactionDo()
-	// FIXME: staticメソッドのコール確認の方法がわからない
-	// function test_transactionDo_トランザクションが実行されている() {}
-	// function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {}
-	// function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {}
+	function test_transactionDo_トランザクションが実行されている() {
+		$_this = $this;
+
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$_this->assertTrue(\DB::in_transaction());
+		});
+	}
+	function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {
+		$_this = $this;
+
+		$before_transaction_count = \Model_Company::count();
+
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$company = new \Model_Company();
+			$company->main_function_id = 'xxxxxxxxxx';
+			$company->platform_id = 'xxxxxxxxxx';
+
+			$company->save();
+		});
+
+		$after_transaction_count = \Model_Company::count();
+		$this->assertEquals($before_transaction_count + 1, $after_transaction_count);
+	}
+	function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {
+		$_this = $this;
+
+		$before_transaction_count = \Model_Company::count();
+
+		$this->setExpectedException('\Database_Exception');
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$company = new \Model_Company();
+			$company->main_function_id = 'xxxxxxxxxx';
+			$company->platform_id = 'xxxxxxxxxx';
+
+			$company->save();
+
+			throw new \Database_Exception('please rollback');
+		});
+
+		$after_transaction_count = \Model_Company::count();
+		$this->assertEquals($before_transaction_count, $after_transaction_count);
+	}
 
 	// _getTableName()
 	// NOTE: クラス名->テーブル名の変換ルールについてはこちらを参照
