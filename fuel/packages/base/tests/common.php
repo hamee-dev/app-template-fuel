@@ -58,9 +58,10 @@ abstract class Test_Common extends TestCase
 	{
 		// 指定されたシードデータを入れなおす
 		foreach($this->restore_tables as $table) {
-			DBUtil::truncate_table($table);
+			DB::delete($table)->execute();
+		}
 
-			// バルクインサート
+		foreach(array_reverse($this->restore_tables) as $table) {
 			if(count(static::$seeds[$table]) > 0) {
 				$this->bulkInsert($table, static::$seeds[$table]);
 			}
