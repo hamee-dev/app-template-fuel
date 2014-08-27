@@ -206,10 +206,16 @@ abstract class Model_Base
 	}
 
 	/**
-	 * インスタンスが既にDBに挿入されているか否かを考慮せずに呼び出すインタフェースを提供する。
-	 * INSERT ON DEPLICATE KEY UPDATE文を実行する。
-	 * 公式ドキュメント：http://dev.mysql.com/doc/refman/5.1/ja/insert-on-duplicate.html
+	 * モデルを保存or更新する
 	 * 
+	 * saveメソッドは、INSERT ~ ON DEPLICATE KEY UPDATE文を実行する。
+	 * 
+	 * > UNIQUE インデックスか PRIMARY KEY 内で複製値を引き起こす行が挿入されると、古い行の UPDATE が実行されます。
+	 * > &mdash; [公式ドキュメント](http://dev.mysql.com/doc/refman/5.1/ja/insert-on-duplicate.html)
+	 * 
+	 * とあるように、重複行がないと更新されずに新規更新される。
+	 * 
+	 * NOTE: ignoreSaveKeyの都合上idは保存対象外となっているため、idのみがUNIQUEなテーブルでは使用できません。
 	 * NOTE: MySQL構文のため、MySQL以外のDBでsaveメソッドを使用することは出来ません。
 	 * 
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
@@ -626,7 +632,7 @@ abstract class Model_Base
 			$ret = call_user_func_array($callback, $params);
 			\DB::commit_transaction();
 
-		} catch(Database_Exception $e) {
+		} catch(\Database_Exception $e) {
 			\DB::rollback_transaction();
 			throw new \Database_Exception($e);
 			$ret = false;

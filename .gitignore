@@ -17,3 +17,4 @@ build
 nbproject/
 
 .vagrant
+fuel/packages/base/tests/coverage/

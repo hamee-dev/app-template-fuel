@@ -20,6 +20,11 @@ class Model_Test extends \Base\Model_Base {
 	protected function after_update($success) {}
 	protected function after_save($success) {}
 	protected function after_delete($success) {}
+
+	// NOTE: protectedなtransactionDoを貫通させるためのメソッド
+	public static function throutghTransactionDo($callback) {
+		return self::transactionDo($callback);
+	}
 }
 
 /**
@@ -27,7 +32,7 @@ class Model_Test extends \Base\Model_Base {
  */
 class Test_Model_Base extends \Test_Common
 {
-	protected $restore_tables = array('tests');
+	protected $restore_tables = array('tests', 'users', 'companies');
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
@@ -80,7 +85,7 @@ class Test_Model_Base extends \Test_Common
 	// __construct()
 	function test___construct_第一引数は省略可能() {
 		$model = new Model_Test();
-		$this->assertInstanceOf('Model_Base', $model);
+		$this->assertInstanceOf('Model_Test', $model);
 	}
 	function test___construct_第一引数に連想配列を渡すとそのキーと値がプロパティに設定される() {
 		$model = new Model_Test(array(
@@ -172,19 +177,32 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
 	}
-	// FIXME: id重複の例外が起きない
-	function test_insert_一度insertしたモデルを再度insertしようとすると例外が発生する() {
-		$model = new Model_Test(array(
-			'int_column' => 1,
-			'varchar_column' => 'hoge',
-			'test_column' => 'hogehoge',
-			'bigint_column' => 123,
-			'bool_column' => false,
-		));
-		$model->insert();
+	function test_insert_第一引数にtrueを与えるとINSERT_IGNOREのSQLが発行される() {
+		$company = new \Model_Company();
+		$company->main_function_id = 'xxxxxxxxxx';
+		$company->platform_id      = 'xxxxxxxxxx';
 
-		$this->setExpectedException('Exception');
-		$model->insert();
+		$company->insert(true);
+		$this->assertStringStartsWith('INSERT IGNORE', \DB::last_query());
+	}
+	function test_insert_第一引数にtrueを与え_DBにあるデータと重複するモデルを挿入しようとしても例外をスローしない() {
+		$original = \Model_Company::find(1);
+
+		$copy = new \Model_Company();
+		$copy->main_function_id = $original->main_function_id;
+		$copy->platform_id      = 'xxxxxxxxxx';
+
+		$copy->insert(true);
+	}
+	function test_insert_第一引数にfalseを与え_DBにあるデータと重複するモデルを挿入しようとすると例外をスローする() {
+		$original = \Model_Company::find(1);
+
+		$copy = new \Model_Company();
+		$copy->main_function_id = $original->main_function_id;
+		$copy->platform_id      = 'xxxxxxxxxx';
+
+		$this->setExpectedException('\Database_Exception');
+		$copy->insert(false);
 	}
 
 	// update()
@@ -223,7 +241,7 @@ class Test_Model_Base extends \Test_Common
 		$model->varchar_column = 'rewrite from test!!';
 		$model->update();
 
-		$this->assertEquals($model, Model_Test::find(1));
+		$this->assertEquals($model->varchar_column, Model_Test::find(1)->varchar_column);
 	}
 	function test_update_updated_atは更新され_created_atは更新されない() {
 		$models = Model_Test::findAll();
@@ -244,6 +262,19 @@ class Test_Model_Base extends \Test_Common
 
 		$model = new Model_Test();
 		$this->assertTrue(is_bool($model->update()));
+	}
+	function test_update_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
+		$models = Model_Test::findAll();
+		$model = $models[0];
+
+		$model->varchar_column = 'rewrite from test';
+		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
+		$model->update();
+
+		$updated_model = Model_Test::find($model->id);
+
+		$this->assertEquals($model->created_at, $updated_model->created_at);
+		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
 	}
 
 	// save()
@@ -278,18 +309,29 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($model->created_at, $now);
 		$this->assertEquals($model->updated_at, $now);
 	}
-	function test_save_更新の際にはcreated_atは変化せずupdated_atの値だけ更新される() {
-		$models = Model_Test::findAll();
-		$model = $models[0];
+	function test_save_UNIQUEキーがDBに存在するデータと重複するモデルをsaveすると更新になる() {
+		$company = \Model_Company::find(1);
+		$company->platform_id = 'hogehogehoge';
 
-		$model->varchar_column = 'rewrite from test';
-		sleep(2);	// NOTE: 2秒待って確実にタイムスタンプを変化させる
-		$model->save();
+		$before_save_count = \Model_Company::count();
+		$company->save();
+		$after_save_count = \Model_Company::count();
 
-		$updated_model = Model_Test::find($model->id);
+		$this->assertEquals($before_save_count, $after_save_count);
+		$this->assertEquals(\Model_Company::find(1)->platform_id, $company->platform_id);
+	}
+	function test_save_UNIQUEキーがDBに存在するデータと重複しないモデルをsaveすると挿入になる() {
+		// NOTE: UNIQUEな要素を書き換えてしまって重複が起きなくなった場合も同様なのでそちらで再現
+		$id = 1;
+		$company = \Model_Company::find($id);
+		$company->main_function_id = 'hogehogehoge';	// NOTE: main_function_idはUNIQUE
 
-		$this->assertEquals($model->created_at, $updated_model->created_at);
-		$this->assertTrue($model->updated_at !== $updated_model->updated_at);
+		$before_save_count = \Model_Company::count();
+		$company->save();
+		$after_save_count = \Model_Company::count();
+
+		$this->assertTrue($before_save_count !== $after_save_count);
+		$this->assertTrue($id !== $company->id);
 	}
 
 	// delete()
@@ -379,7 +421,7 @@ class Test_Model_Base extends \Test_Common
 		$this->assertEquals($rows, $all_row_count);
 	}
 	function test_count_存在しない条件を与えると戻り値はゼロ() {
-		$not_exist_condition = array(array('id', '=', 10000));
+		$not_exist_condition = array('id', '=', 10000);
 		// NOTE: false=重複行も１行ずつカウントする
 		$matched_row_count = Model_Test::count('id', false, $not_exist_condition);
 
@@ -387,10 +429,48 @@ class Test_Model_Base extends \Test_Common
 	}
 
 	// transactionDo()
-	// FIXME: staticメソッドのコール確認の方法がわからない
-	// function test_transactionDo_トランザクションが実行されている() {}
-	// function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {}
-	// function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {}
+	function test_transactionDo_トランザクションが実行されている() {
+		$_this = $this;
+
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$_this->assertTrue(\DB::in_transaction());
+		});
+	}
+	function test_transactionDo_コールバックで例外が起きずに終了するとコミットされる() {
+		$_this = $this;
+
+		$before_transaction_count = \Model_Company::count();
+
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$company = new \Model_Company();
+			$company->main_function_id = 'xxxxxxxxxx';
+			$company->platform_id = 'xxxxxxxxxx';
+
+			$company->save();
+		});
+
+		$after_transaction_count = \Model_Company::count();
+		$this->assertEquals($before_transaction_count + 1, $after_transaction_count);
+	}
+	function test_transactionDo_コールバック内で例外を投げるとロールバックされる() {
+		$_this = $this;
+
+		$before_transaction_count = \Model_Company::count();
+
+		$this->setExpectedException('\Database_Exception');
+		Model_Test::throutghTransactionDo(function() use ($_this) {
+			$company = new \Model_Company();
+			$company->main_function_id = 'xxxxxxxxxx';
+			$company->platform_id = 'xxxxxxxxxx';
+
+			$company->save();
+
+			throw new \Database_Exception('please rollback');
+		});
+
+		$after_transaction_count = \Model_Company::count();
+		$this->assertEquals($before_transaction_count, $after_transaction_count);
+	}
 
 	// _getTableName()
 	// NOTE: クラス名->テーブル名の変換ルールについてはこちらを参照
