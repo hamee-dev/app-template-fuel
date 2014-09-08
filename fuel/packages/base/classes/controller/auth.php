@@ -83,11 +83,21 @@ abstract class Controller_Auth extends Controller_Base
 
 		$company_info = $this->_fetch_company_info();
 		$company = $this->_create_company($company_info);
-		$company->save();	// INSERT or UPDATE
+		// INSERT IGNOREでないとログインするたびに情報がリセットされる
+		// 意図的にINSERT or UPDATEにしていないことに注意
+		if(!$company->insert(true)) {
+			$company = \Model_Company::findBy('main_function_id', $company->main_function_id);
+			$company = $company[0];
+		}
 
 		$user_info = $this->_fetch_user_info();
 		$user = $this->_create_user($user_info, $company->id);
-		$user->save();		// INSERT or UPDATE
+		// INSERT IGNOREでないとログインするたびに情報がリセットされる
+		// 意図的にINSERT or UPDATEにしていないことに注意
+		if(!$user->insert(true)) {
+			$user = \Model_User::findBy('uid', $user->uid);
+			$user = $user[0];
+		}
 
 		// セッションにログインユーザの情報をセット
 		\Session::set($session_key_company, $company);
