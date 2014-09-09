@@ -92,12 +92,10 @@ abstract class Controller_Auth extends Controller_Base
 
 		$user_info = $this->_fetch_user_info();
 		$user = $this->_create_user($user_info, $company->id);
-		// INSERT IGNOREでないとログインするたびに情報がリセットされる
-		// 意図的にINSERT or UPDATEにしていないことに注意
-		if(!$user->insert(true)) {
-			$user = \Model_User::findBy('uid', $user->uid);
-			$user = $user[0];
-		}
+
+		// INSERT or UPDATEでないと、ログイン時にアクセストークン、リフレッシュトークンがリセットされない。
+		// 意図的にINSERT or UPDATEにしていることに注意
+		$user->save();
 
 		// セッションにログインユーザの情報をセット
 		\Session::set($session_key_company, $company);
