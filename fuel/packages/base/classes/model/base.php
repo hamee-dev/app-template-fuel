@@ -218,20 +218,33 @@ abstract class Model_Base
 	 * NOTE: ignoreSaveKeyの都合上idは保存対象外となっているため、idのみがUNIQUEなテーブルでは使用できません。
 	 * NOTE: MySQL構文のため、MySQL以外のDBでsaveメソッドを使用することは出来ません。
 	 * 
+	 * @param  string[] 挿入または更新するカラム名を指定。省略された場合は定義されている全てのプロパティを挿入/更新する
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
-	public function save() {
+	public function save(array $columns = array()) {
 		$this->hook('before_save');
 
 		$this->updated_at = \DB::expr('NOW()');
 
+		// 挿入/更新するカラム名が与えられていたら、そのカラムだけ挿入/更新する
+		$attrs = $this->toArray();
+		if(count($columns) > 0) {
+			$_attrs = array();
+
+			foreach($columns as $column) {
+				$_attrs[$column] = $attrs[$column];
+			}
+
+			$attrs = $_attrs;
+		}
+
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
 		// ON DUPLICATE KEY UPDATEを追記したクエリビルダオブジェクトを生成する
-		$query = \DB::insert($this->_getTableName())->set($this->toArray());
+		$query = \DB::insert($this->_getTableName())->set($attrs);
 
 		// ON DUPLICATE KEY UPDATE以降で更新する値を、自前でなくクエリビルダを利用して生成する
 		// FIXME: かなりゴリ押し。テーブル名が大文字でSETとかだった場合にバグります。
-		$update_sql    = \DB::update($this->_getTableName())->set($this->toArray())->compile();
+		$update_sql    = \DB::update($this->_getTableName())->set($attrs)->compile();
 		$set_pos       = mb_strpos($update_sql, ' SET ');
 		$after_set_sql = mb_substr($update_sql, $set_pos + 5);	// ' SET 'の3文字を読み飛ばす
 
