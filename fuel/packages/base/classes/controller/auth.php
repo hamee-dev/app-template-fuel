@@ -81,20 +81,24 @@ abstract class Controller_Auth extends Controller_Base
 			\Response::redirect('/auth/login');
 		}
 
+		// NOTE: 企業情報を取得し、main_function_id(UNIQUE)でSELECTをかける。
+		//       見つかればそのデータを上書きして更新、見つからなければ新規インスタンスに値をセットして挿入する
+		// NOTE: カラム名はmain_function_idだが、取得した企業情報のフィールドでは`company_id`なことに注意。
 		$company_info = $this->_fetch_company_info();
-		$company = $this->_create_company($company_info);
-		// INSERT IGNOREでないとログインするたびに情報がリセットされる
-		// 意図的にINSERT or UPDATEにしていないことに注意
-		if(!$company->insert(true)) {
-			$company = \Model_Company::findBy('main_function_id', $company->main_function_id);
-			$company = $company[0];
-		}
+		$companies    = \Model_Company::findBy('main_function_id', $company_info['company_id']);
+		$company      = ((count($companies) > 0) ? $companies[0] : new \Model_Company());
 
+		$company = $this->_create_company($company, $company_info);
+		$company->save();
+
+
+		// NOTE: ユーザ情報を取得し、uid(UNIQUE)でSELECTをかける。
+		//       見つかればそのデータを上書きして更新、見つからなければ新規インスタンスに値をセットして挿入する
 		$user_info = $this->_fetch_user_info();
-		$user = $this->_create_user($user_info, $company->id);
+		$users     = \Model_User::findBy('uid', $user_info['uid']);
+		$user      = ((count($users) > 0) ? $users[0] : new \Model_User());
 
-		// INSERT or UPDATEでないと、ログイン時にアクセストークン、リフレッシュトークンがリセットされない。
-		// 意図的にINSERT or UPDATEにしていることに注意
+		$user = $this->_create_user($user, $user_info, $company->id);
 		$user->save();
 
 		// セッションにログインユーザの情報をセット
@@ -109,17 +113,18 @@ abstract class Controller_Auth extends Controller_Base
 
 	/**
 	 * APIから取得した情報を元にCompanyモデルを作成し返却する
-	 * 既にDBに企業データが存在している場合は、それを取得して返す。
 	 * 
-	 * @param  array $company_info ログイン企業の情報（連想配列）
+	 * インスタンスは、既にDBに存在するデータから取得するか、存在しない場合newされたものが渡される
+	 * ログイン処理の度に毎回更新すべき情報を全てセットすること。
+	 * 
+	 * @param  Model_Company $company      （DBから取得した or newした）企業モデルのインスタンス
+	 * @param  array          $company_info ログイン企業の情報（連想配列）
 	 * @return Model_Company プロパティに値をセットしたインスタンス
 	 */
-	protected function _create_company(array $company_info)
+	protected function _create_company(\Model_Company $company, array $company_info)
 	{
-		$company = new \Model_Company(array(
-			'platform_id'      => $company_info['company_ne_id'],
-			'main_function_id' => $company_info['company_id'],
-		));
+		$company->platform_id      = $company_info['company_ne_id'];
+		$company->main_function_id = $company_info['company_id'];
 
 		return $company;
 	}
@@ -127,20 +132,22 @@ abstract class Controller_Auth extends Controller_Base
 	/**
 	 * APIから取得した情報を元にUserモデルを作成し返却する
 	 * 
-	 * @param  array $user_info  ログインユーザの情報（連想配列）
-	 * @param  int   $company_id 所属している企業ID
+	 * インスタンスは、既にDBに存在するデータから取得するか、存在しない場合newされたものが渡される
+	 * ログイン処理の度に毎回更新すべき情報を全てセットすること。
+	 * 
+	 * @param  Model_User $user       （DBから取得した or newした）ユーザモデルのインスタンス
+	 * @param  array      $user_info  ログインユーザの情報（連想配列）
+	 * @param  int        $company_id 所属している企業ID
 	 * @return Model_User プロパティに値をセットしたインスタンス
 	 */
-	protected function _create_user(array $user_info, $company_id)
+	protected function _create_user(\Model_User $user, array $user_info, $company_id)
 	{
-		$user = new \Model_User(array(
-			'company_id'     => $company_id,
-			'uid'            => $user_info['uid'],
-			'next_engine_id' => $user_info['pic_ne_id'],
-			'email'          => $user_info['pic_mail_address'],
-			'access_token'   => static::$client->_access_token,
-			'refresh_token'  => static::$client->_refresh_token,
-		));
+		$user->company_id     = $company_id;
+		$user->uid            = $user_info['uid'];
+		$user->next_engine_id = $user_info['pic_ne_id'];
+		$user->email          = $user_info['pic_mail_address'];
+		$user->access_token   = static::$client->_access_token;
+		$user->refresh_token  = static::$client->_refresh_token;
 
 		return $user;
 	}
