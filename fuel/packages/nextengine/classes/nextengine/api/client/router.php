@@ -9,6 +9,18 @@ namespace Nextengine\Api;
 class Client_Router extends Client
 {
 	/**
+	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
+	 * 
+	 * @param  array $config          設定値（この値が優先される）
+	 * @return Nextengine\Api\Client
+	 */
+	public function __construct(array $config = array())
+	{
+		// NOTE: trueを指定することでアクセストークン切れ時にリダイレクトで再認証がかかる
+		parent::__construct($config, true);
+	}
+
+	/**
 	 * 例外の振り分けを行う
 	 * 
 	 * ### 親クラスからの拡張点
