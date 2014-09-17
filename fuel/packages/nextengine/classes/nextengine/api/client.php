@@ -58,6 +58,14 @@ class Client extends \neApiClient
 	{
 		$config = \Arr::merge(self::$_defaults, $config);
 
+		// NOTE: バッチ処理ではredirect_uriを指定したくない
+		//       なぜなら、redirect_uriを指定するとアクセストークンが切れた時に自動的にSDKがリダイレクトしてしまうから。
+		//       コンストラクタのredirect_uriにnullを渡せばリダイレクトを自動で発生させないようになる。
+		// NOTE: リダイレクトが必要なコントローラでのAPIクライアントは、このクラスを継承したClient_Routerクラスを使用する。
+		if(!$redirect) {
+			$config['redirect_uri'] = null;
+		}
+
 		parent::__construct(
 			$config['client_id'],
 			$config['client_secret'],
