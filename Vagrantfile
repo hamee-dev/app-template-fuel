@@ -137,11 +137,16 @@ EOF
     # --- Date -> MySQL date config
     sed "s/\[mysqld\]/[mysqld]\ndefault-time-zone='+9:00'/" /etc/my.cnf -i
 
+    # --- disable Firewall
+    service iptables stop
+    chkconfig iptables off
+
+    # --- disable Apache
+    chkconfig httpd off
+
     # --- setup
     service nginx start
     service php-fpm start
-
-    chkconfig httpd off
 
     chkconfig --add nginx
     chkconfig --levels 235 nginx on
