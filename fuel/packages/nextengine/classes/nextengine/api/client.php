@@ -52,9 +52,10 @@ class Client extends \neApiClient
 	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
 	 * 
 	 * @param  array      $config 設定値（この値が優先される）
+	 * @param  bool  $redirect リダイレクトの指定が来た時に強制的にリダイレクトをするか否か。デフォルトはfalse(しない)
 	 * @return Nextengine\Api\Client
 	 */
-	public function __construct(array $config = array())
+	public function __construct(array $config = array(), $redirect = false)
 	{
 		$config = \Arr::merge(self::$_defaults, $config);
 
