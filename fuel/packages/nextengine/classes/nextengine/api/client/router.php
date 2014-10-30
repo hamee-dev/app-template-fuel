@@ -42,7 +42,7 @@ class Client_Router extends Client
 				// メンテナンス中 => メンテナンス中です画面へリダイレクト
 				case '002007':	// 現在ネクストエンジンサーバーがメンテナンス中の為、再度時間を置いてからアクセスして下さい。
 				case '003004':	// 現在メイン機能サーバーがメンテナンス中の為、再度時間を置いてからアクセスして下さい。
-					\Response::redirect('/error/maintenance');
+					\Response::redirect('/errors/maintenance');
 					break;
 
 				// 混み合ってます、受注取り込み中です => しばらく待ってアクセスして下さい画面へリダイレクト
@@ -51,7 +51,7 @@ class Client_Router extends Client
 				case '008003':	// 受注取込中のため、更新出来ません。
 				case '008007':	// 納品書印刷中の伝票があります。時間を空けて再度APIを実行して下さい。
 				case '008010':	// 棚卸中のため、更新出来ません。
-					\Response::redirect('/error/congestion');
+					\Response::redirect('/errors/congestion');
 					break;
 
 				// 支払い等の理由で利用停止、システムエラー => 営業に問い合わせてねエラー画面へリダイレクト
@@ -59,7 +59,7 @@ class Client_Router extends Client
 				case '002003':	// [xxxxx]様のネクストエンジンが、次の理由により利用停止になっています。[xxxxx]
 				case '003003':	// [xxxxx]様のメイン機能が、利用停止です。
 				case '999999':	// APIサーバーのシステムエラーが発生しました。
-					\Response::redirect('/error');
+					\Response::redirect('/errors');
 					break;
 
 				default:
