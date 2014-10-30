@@ -104,6 +104,7 @@ abstract class Controller_Auth extends Controller_Base
 		// セッションにログインユーザの情報をセット
 		\Session::set($session_key_company, $company);
 		\Session::set($session_key_user, $user);
+		\Session::set('company_app_header', $company_info['company_app_header']);
 	}
 
 

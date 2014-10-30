@@ -9,6 +9,7 @@
 	</style>
 </head>
 <body>
+	<div class="pull-right"><?= Session::get('company_app_header') ?></div>
 	<div class="container">
 		<div class="col-md-12">
 			<h1><?php echo $title; ?></h1>
