@@ -8,25 +8,25 @@ namespace Base;
 /**
  * エラー画面のレンダリングを行うクラス
  */
-abstract class Controller_Error extends Controller_Base
+abstract class Controller_Errors extends Controller_Base
 {
 	public $template = 'template-error';
 
 	public function get_index()
 	{
 		$this->template->title = 'Error &raquo; Index';
-		$this->template->content = \View::forge('error/index');
+		$this->template->content = \View::forge('errors/index');
 	}
 
 	public function get_maintenance()
 	{
 		$this->template->title = 'Error &raquo; Maintenance';
-		$this->template->content = \View::forge('error/maintenance');
+		$this->template->content = \View::forge('errors/maintenance');
 	}
 
 	public function get_congestion()
 	{
 		$this->template->title = 'Error &raquo; Congestion';
-		$this->template->content = \View::forge('error/congestion');
+		$this->template->content = \View::forge('errors/congestion');
 	}
 }
