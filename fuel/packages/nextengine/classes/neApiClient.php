@@ -11,10 +11,8 @@ class neApiClient {
 	////////////////////////////////////////////////////////////////////////////
 	// 利用するサーバーのURLのスキーム＋ホスト名の定義
 	////////////////////////////////////////////////////////////////////////////
-	// const API_SERVER_HOST   = 'https://api.next-engine.org' ;
-	// const NE_SERVER_HOST    = 'https://base.next-engine.org' ;
-	const API_SERVER_HOST   = 'https://api-staging-7bb4f9fa629b4.next-engine.org' ;
-	const NE_SERVER_HOST    = 'https://base-staging-0783cb7149209.next-engine.org' ;
+	const API_SERVER_HOST   = 'https://api.next-engine.org' ;
+	const NE_SERVER_HOST    = 'https://base.next-engine.org' ;
 
 	////////////////////////////////////////////////////////////////////////////
 	// 認証に用いるURLのパスを定義
@@ -155,6 +153,23 @@ class neApiClient {
 	}
 
 	/**
+	* ネクストエンジンログインが不要なAPIを実行します。
+	* 
+	* @param	string	$path			呼び出すAPIのパスです。/から指定して下さい。
+	* @param	array	$api_params		呼び出すAPIの必要に応じてパラメータ(連想配列)です。
+	*									パラメータが不要な場合、省略又はNULLを指定して下さい。
+	*
+	* @return	array  実行結果。内容は呼び出したAPIにより異なります。
+	*/
+	public function apiExecuteNoRequiredLogin($path, $api_params = array()) {
+		$api_params['client_id'] = $this->_client_id ;
+		$api_params['client_secret'] = $this->_client_secret ;
+
+		$response = $this->post(self::API_SERVER_HOST.$path, $api_params) ;
+		return($response) ;
+	}
+
+	/**
 	* ネクストエンジンログインのみ実行します。
 	* 既にログインしている場合、ログイン後の基本情報を返却します。
 	* まだログインしていない場合、ネクストエンジンログイン画面にリダイレクトされ、
@@ -181,7 +196,6 @@ class neApiClient {
 
 		return($response) ;
 	}
-
 
 	///////////////////////////////////////////////////////
 	// 以下は全てSDKの内部処理用のメソッドです
