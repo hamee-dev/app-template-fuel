@@ -114,6 +114,28 @@ class Client extends \neApiClient
 	}
 
 	/**
+	 * ネクストエンジンログインが不要なAPIを実行する
+	 * 
+	 * ## 親クラスからの拡張点
+	 * エラー処理を追加
+	 *
+	 * @throws NextengineApiException
+	 * @return mixed APIのレスポンス。詳しくはhttp://api.next-e.jp/request_url.phpを参照。
+	 */
+	public function apiExecuteNoRequiredLogin($path, $api_params = array()) {
+		$response = parent::apiExecuteNoRequiredLogin($path, $api_params);
+
+		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php
+		//       エラー時の振る舞いについては、本クラスのfailoverメソッドを参照。
+		if($response['result'] !== self::RESULT_SUCCESS) {
+			$this->failover($response['code'], $response['message']);
+		}
+
+		return $response;
+	}
+
+
+	/**
 	 * ユーザ情報をセットする
 	 * 
 	 * @param Model_User $user ユーザのインスタンス
