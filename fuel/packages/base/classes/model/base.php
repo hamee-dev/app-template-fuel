@@ -21,15 +21,14 @@ namespace Base;
  * なので、DBのカラム名とモデルのプロパティは必ず一致させてください。
  * また、カラムなのかモデルのプロパティなのか、明確に分けるための命名規約が以下のとおりです。  
  * 
- * |種類           |命名規則|
- * |DBのカラム      |スネークケース|
- * |モデルのプロパティ|キャメルケース|
+ * |種類				|命名規則			|
+ * |----------------|---------------|
+ * |DBのカラム		|スネークケース	|
+ * |モデルのプロパティ	|キャメルケース	|
  * 
  * と命名規則を分けてください。
- * Model_Baseで言えば、id, created_at, updated_atがカラム名（スネークケース）  
- * validationErrors, ignoreSaveKeyがモデルのプロパティ（キャメルケース）です。
- * 
- * @author Shingo Inoue <inoue.shingo@hamee.co.jp>
+ * Model_Baseで言えば、`id`, `created_at`, `updated_at`がカラム名（スネークケース）  
+ * `validationErrors`, `ignoreSaveKey`がモデルのプロパティ（キャメルケース）です。
  */
 abstract class Model_Base
 {
