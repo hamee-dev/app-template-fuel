@@ -12,7 +12,7 @@ abstract class Controller_Auth extends Controller_Base
 {
 	/**
 	 * ネクストエンジンAPIクライアントのインスタンスを保持する
-	 * @var Nextengine\Api\Client
+	 * @var \Nextengine\Api\Client
 	 */
 	protected static $client;
 
