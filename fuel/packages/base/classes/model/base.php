@@ -12,7 +12,8 @@ namespace Base;
  * ### クラス名とテーブル名の命名規約
  * クラス名とテーブル名を縛ることで、命名規約に則りさえすれば、楽にモデルのコードを書くことが出来る。
  * 
- * FuelPHPのモデルクラスは'Model_**'となるので、model_を取り払った**を複数形にしたものがテーブル名となる。  
+ * FuelPHPのモデルクラスは`Model_*`となるので、model_を取り払った*を複数形にしたものがテーブル名となる。
+ * 
  * ex) Model_Base => 'bases', Model_Test => 'tests', Model_HogeHoge => 'hogehoges'
  * 
  * 
