@@ -15,7 +15,7 @@ return array(
 
 	// セッションのキーを設定値として持つ
 	'keys' => array(
-	    'ACCOUNT_USER' => 'account.user',
-	    'ACCOUNT_COMPANY' => 'account.company',
+		'ACCOUNT_USER' => 'account.user_id',
+		'ACCOUNT_COMPANY' => 'account.company_id',
 	)
 );
