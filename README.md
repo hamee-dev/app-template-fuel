@@ -1,29 +1,15 @@
 
-# base-fuelphp
-社内用アプリの汎用テンプレートです。
+# sample-fuelphp
+PHPでネクストエンジンアプリを作成するためのテンプレートです  
+このテンプレートは[FuelPHP](http://fuelphp.jp/docs/1.7/)をベースに作成されています
 
-## Vagrantfile
-- Nginx
-- ssl
-- MySQL 5.6
-- PHP5.4
-- XDebug（不要なら消して下さい。）
+## ドキュメント
+- [ネクストエンジンAPIのドキュメント](http://api.next-e.jp/)
+- [このテンプレートのドキュメント](http://api.next-e.jp/sample-fuelphp/)
 
-をVagrantfileに詰め込んであります。
-
-### バージョン
-具体的なバージョンは以下の通りです。
-
-|項目名	|バージョン	|
-|-------|-----------|
-|CentOS	|6.5(64bit)	|
-|Nginx	|1.0.15		|
-|PHP	|5.4.31		|
-|MySQL	|5.6.20		|
-
-
-### 立ち上げ
-boxを追加し、`vagrant up`でVMを起動します。
+## Vagrant
+[Vagrant](https://www.vagrantup.com/)を使用してローカル環境を構築できます  
+boxを追加し、`vagrant up`でVMを起動します  
 
 ```
 $ vagrant box add --name centos65_64bit https://github.com/2creatives/vagrant-centos/releases/download/v6.5.3/centos65-x86_64-20140116.box
@@ -31,13 +17,29 @@ $ cd /path/to/base-fuelphp
 $ vagrant up
 ```
 
+プロビジョニングの設定は全てVagrantfileに書かれています  
+そちらをご確認の上、必要であれば修正をお願い致します
+
+### バージョン
+VMにインストールされるソフトウェア・パッケージのバージョンは下記の通りです
+
+|項目名	|バージョン	|
+|-------|-----------|
+|CentOS	|6.5(64bit)	|
+|Nginx	|1.0.15		|
+|PHP	|5.5		|
+|MySQL	|5.6.20		|
+
+
 ### データベースの設定
-**データベースの設定が必須です。**  
-`vagrant up`すると、末尾に下記のような出力があると思います。
+VM内のデータベースを使用する際は**データベースの設定が必須です**  
+`vagrant up`を実行すると、標準出力に下記の内容が出力されます
 
-`# The random password set for the root user at Mon Aug 11 00:26:15 2014 (local time): sH6kzNxNbpcyCfgV`
+```
+# The random password set for the root user at Mon Aug 11 00:26:15 2014 (local time): sH6kzNxNbpcyCfgV
+```
 
-この行末の`sH6kzNxNbpcyCfgV`（※実行ごとに変わる）をコピーして、下記手順を踏んで下さい。
+行末の`sH6kzNxNbpcyCfgV`（※この値は実行ごとに変わります）をコピーし、下記手順を行って下さい
 
 ```
 $ vagrant ssh
@@ -45,7 +47,7 @@ $ vagrant ssh
 [vagrant@vagrant-centos65 ~]$ mysql_secure_installation
 Enter current password for root (enter for none): # 今コピーしたパスワードを貼り付け
 Change the root password? [Y/n] y
-New password: # 任意のパスワードを入力
+New password:          # 任意のパスワードを入力
 Re-enter new password: # 任意のパスワードを入力
 Remove anonymous users? [Y/n] y
 Disallow root login remotely? [Y/n] y
@@ -53,77 +55,11 @@ Remove test database and access to it? [Y/n] y
 Reload privilege tables now? [Y/n] y
 ```
 
-接続情報を設定したら、使用するデータベースを作成して下さい。
+ユーザ名`root`、設定したパスワードでmysqlにログインできれば
 
-**なお、リモートからの接続ができないようになっているため、**  
-**DBに関する操作（DBの作成・マイグレーションなど）は`vagrant ssh`でVMにログインした状態で行って下さい。**
+> 参考：[DBの接続設定の更新 - ネクストエンジンAPI](http://api.next-e.jp/sample-fuelphp/download.php)
 
-### DBの接続情報を設定
+<!---->
 
-設定したパスワードを元に、DBの接続情報を変更します。  
-下記に設定例を記します。
-
-```php
-<?php
-
-return array(
-	'default' => array(
-		'connection'  => array(
-			'dsn'        => 'mysql:host=127.0.0.1;dbname=app_base_dev',
-			'username'   => 'root',
-			'password'   => 'hamee831',
-		),
-	),
-);
-```
-
-|項目名		|値					|
-|-----------|-------------------|
-|host		|127.0.0.1			|
-|dbname		|作成したデータベース名	|
-|username	|root				|
-|password	|設定したパスワード		|
-
-Sequel Pro等のGUIクライアントを使用する場合は、
-
-|項目名		|値					|
-|-----------|-------------------|
-|接続		|SSH				|
-|SSHホスト	|192.168.33.10		|
-|SSHユーザ	|vagrant			|
-|SSH鍵		|~/.vagrant.d/insecure_private_key を指定、パスフレーズなし|
-
-と設定して下さい。
-
-### 動作確認
-ブラウザから`https://192.168.33.10`にアクセスするとWelcomeページが見られます。
-
-`https://192.168.33.10/auth/login`にアクセスして、  
-「Authenticate complete!!」と出力されれば、DBの接続確認および、FuelPHPの動作確認は完了です。
-
-## マイグレーション
-
-### アプリ独自のマイグレーションの作成
-基盤として提供しているマイグレーションは、  
-`base`パッケージの中の`migrations`ディレクトリに入っています。  
-
-基盤として提供されているマイグレーションからカラムを追加したり削除を行う場合には、  
-`fuel/packages/base/migrations`ではなく、`fuel/app/migrations`にマイグレーションファイルを作成して下さい。
-
-> ※ `$ php oil g migration ***...`と記述すれば自動で`fuel/app/migrations`に作成されるため、特に問題はないかと思います。
-
-### マイグレーションを実行
-マイグレーションは`base`パッケージの中に入っているため、  
-通常のマイグレーションではなく`--packages`オプションをつけて実行します。
-
-また、アプリ独自のマイグレーションを作成した場合には、  
-**baseパッケージのマイグレーションを実行した後に、`--packages`オプション無しで** マイグレーションを実行します
-
-```shell
-$ vagrant ssh
-
-[vagrant@vagrant-centos65 ~]$ cd /vagrant/
-[vagrant@vagrant-centos65 vagrant]$ php oil r migrate --packages=base
-[vagrant@vagrant-centos65 vagrant]$ php oil r migrate
-```
-
+> VM内のデータベースはリモートから接続できない設定にしているため、  
+> DBに関する操作（DBの作成・マイグレーションなど）はVMにログインした状態で行って下さい
