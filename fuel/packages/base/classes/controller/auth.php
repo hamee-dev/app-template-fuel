@@ -76,12 +76,12 @@ abstract class Controller_Auth extends Controller_Base
 		$session_key_user    = \Config::get('session.keys.ACCOUNT_USER');
 
 		// NOTE: 可読性と関数呼び出しのオーバーヘッド軽減のため、結果を変数にキャッシュ
-		$session_user = \Session::get($session_key_user);
-		$uid          = \Input::get('uid');
-		$state        = \Input::get('state');
+		$user_id = \Session::get($session_key_user);
+		$uid     = \Input::get('uid');
+		$state   = \Input::get('state');
 
 		// セッションもURLにも何もない = 通常操作では起こりえない非正規ルートなので再認証させる
-		if(is_null($uid) && is_null($state) && is_null($session_user)) {
+		if(is_null($uid) && is_null($state) && is_null($user_id)) {
 			\Response::redirect('/auth/login');
 		}
 
@@ -106,8 +106,8 @@ abstract class Controller_Auth extends Controller_Base
 		$user->save();
 
 		// セッションにログインユーザの情報をセット
-		\Session::set($session_key_company, $company);
-		\Session::set($session_key_user, $user);
+		\Session::set($session_key_company, $company->id);
+		\Session::set($session_key_user, $user->id);
 		\Session::set('company_app_header', $company_info['company_app_header']);
 	}
 

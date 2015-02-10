@@ -100,15 +100,12 @@ class Client extends \neApiClient
 			$this->failover($response['code'], $response['message']);
 		}
 
-		// APIを叩く前後でアクセストークンが変わっていたら、ユーザモデルを更新してDBに反映、セッションも更新する
+		// APIを叩く前後でアクセストークンが変わっていたら、ユーザモデルを更新してDBに反映
 		// ただしユーザモデルが格納されていない場合もあるので、その場合はその処理を行わない
 		if(!is_null($this->user) && ($before_exec_access_token !== $this->_access_token)) {
 			$this->user->access_token  = $this->_access_token;
 			$this->user->refresh_token = $this->_refresh_token;
 			$this->user->save();
-
-			$user_key = \Config::get('session.keys.ACCOUNT_USER');
-			\Session::set($user_key, $this->user);
 		}
 
 		return $response;

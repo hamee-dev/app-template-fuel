@@ -23,28 +23,19 @@ abstract class Controller_Neapi extends Controller_Base
 	protected static $client;
 
 	/**
-	 * APIを使用する画面で共通処理として必要なセッション処理、クライアントの初期化を行う。
+	 * APIを使用する画面で共通処理として必要な処理、クライアントの初期化を行う。
+	 * 
 	 * @return void
 	 */
-	public static function _init()
+	public function before()
 	{
-		parent::_init();
+		parent::before();
 
-		$user_key = \Config::get('session.keys.ACCOUNT_USER');
-		$session_user = \Session::get($user_key);
-
-		// セッション切れの場合ログイン処理へリダイレクト
-		if(is_null($session_user)) {
-			\Response::redirect('/auth/login');
-		}
-
-		// セッションに保持されたユーザIDに対応するユーザが居ない場合ログイン処理へリダイレクト
-		$user = \Model_User::find($session_user->id);
-		if(is_null($user)) {
+		if(is_null($this->user)) {
 			\Response::redirect('/auth/login');
 		}
 
 		self::$client = new \Nextengine\Api\Client_Router();
-		self::$client->setUser($user);
+		self::$client->setUser($this->user);
 	}
 }

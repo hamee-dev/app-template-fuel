@@ -13,6 +13,9 @@ namespace Base;
  */
 abstract class Controller_Base extends \Controller_Template
 {
+	protected $company = null;
+	protected $user = null;
+
 	/**
 	 * アクセスされたユーザの言語ロケールを取得する
 	 * 
@@ -50,5 +53,33 @@ abstract class Controller_Base extends \Controller_Template
 		\Lang::load('model.yml', 'model');
 		\Lang::load('page.yml', 'page');
 		\Lang::load('message.yml', 'message');
+	}
+
+	/**
+	 * アクションの実行前に企業情報とユーザ情報をセットする
+	 * 
+	 * ただしログイン済みの場合のみ。未ログインの場合はプロパティはnullのままです。
+	 * この仕様を利用してログイン判定をすることができます。
+	 * が、Controller_Neapiクラスを継承しているならその処理を記述済みなのであえて書く必要はありません。
+	 * 
+	 * Fuelのドキュメントにもありますが、互換性を維持するため継承したクラスでbeforeメソッドを使用する場合には必ずparent::before()をコールして下さい。
+	 * 
+	 * @return void
+	 */
+	public function before()
+	{
+		parent::before();
+
+		$key_company = \Config::get('session.keys.ACCOUNT_COMPANY');
+		$key_user    = \Config::get('session.keys.ACCOUNT_USER');
+
+		$company_id = \Session::get($key_company);
+		$user_id    = \Session::get($key_user);
+
+		// ログインしていなければnull、していればそれぞれのインスタンスをセットする
+		if(!is_null($company_id) && !is_null($user_id)) {
+			$this->company = \Model_Company::find($company_id);
+			$this->user    = \Model_User::find($user_id);
+		}
 	}
 }
