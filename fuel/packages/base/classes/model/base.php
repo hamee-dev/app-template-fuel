@@ -21,15 +21,14 @@ namespace Base;
  * なので、DBのカラム名とモデルのプロパティは必ず一致させてください。
  * また、カラムなのかモデルのプロパティなのか、明確に分けるための命名規約が以下のとおりです。  
  * 
- * |種類           |命名規則|
- * |DBのカラム      |スネークケース|
- * |モデルのプロパティ|キャメルケース|
+ * |種類				|命名規則			|
+ * |----------------|---------------|
+ * |DBのカラム		|スネークケース	|
+ * |モデルのプロパティ	|キャメルケース	|
  * 
  * と命名規則を分けてください。
- * Model_Baseで言えば、id, created_at, updated_atがカラム名（スネークケース）  
- * validationErrors, ignoreSaveKeyがモデルのプロパティ（キャメルケース）です。
- * 
- * @author Shingo Inoue <inoue.shingo@hamee.co.jp>
+ * Model_Baseで言えば、`id`, `created_at`, `updated_at`がカラム名（スネークケース）  
+ * `validationErrors`, `ignoreSaveKey`がモデルのプロパティ（キャメルケース）です。
  */
 abstract class Model_Base
 {
@@ -53,6 +52,7 @@ abstract class Model_Base
 
 	/**
 	 * findで比較に用いる主キー
+	 * @var string
 	 */
 	protected static $primaryKey = 'id';
 
@@ -64,7 +64,8 @@ abstract class Model_Base
 
 	/**
 	 * 保存時に除外するプロパティ
-	 * ここに指定していないプロパティは、全て保存処理がされてしまうので注意。
+	 * 
+	 * ここに指定していないプロパティは、全て保存処理がされてしまうので注意。  
 	 * NOTE: updated_atは自動更新するので触らない(on UPDATE on update CURRENT_TIMESTAMPが設定されている)
 	 * @var string[]
 	 */
@@ -96,8 +97,7 @@ abstract class Model_Base
 	/**
 	 * データの妥当性をチェックする。
 	 * 
-	 * @return boolean バリデーションに成功したらtrue。
-	 *                 エラーがあればfalseを返し、validationErrorsにエラーメッセージを格納する
+	 * @return boolean バリデーションに成功したらtrue。エラーがあればfalseを返し、validationErrorsにエラーメッセージを格納する
 	 */
 	public function validate() {
 		$this->hook('before_validate');
@@ -118,6 +118,7 @@ abstract class Model_Base
 
 	/**
 	 * データをDBに挿入する。
+	 * 
 	 * NOTE: データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * 
 	 * @param boolean $insert_ignore INSERT IGNOREを使用するか否か(trueなら使用、falseは不使用)
@@ -160,6 +161,7 @@ abstract class Model_Base
 
 	/**
 	 * データのDB上の更新を行う。
+	 * 
 	 * NOTE: データの検証は行わないので、事前にvalidateで入力チェックをしておくこと。
 	 * 
 	 * @return boolean
@@ -218,7 +220,7 @@ abstract class Model_Base
 	 * NOTE: ignoreSaveKeyの都合上idは保存対象外となっているため、idのみがUNIQUEなテーブルでは使用できません。
 	 * NOTE: MySQL構文のため、MySQL以外のDBでsaveメソッドを使用することは出来ません。
 	 * 
-	 * @param  string[] 挿入または更新するカラム名を指定。省略された場合は定義されている全てのプロパティを挿入/更新する
+	 * @param  string[] $columns 挿入または更新するカラム名を指定。省略された場合は定義されている全てのプロパティを挿入/更新する
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
 	public function save(array $columns = array()) {
@@ -405,14 +407,14 @@ abstract class Model_Base
 
 	/**
 	 * FuelPHPのModel_Crudから持ってきて、このクラス用に改造しました。
-	 * http://fuelphp.jp/docs/1.7/classes/model_crud/methods.html#/method_count
 	 *
 	 * Count all of the rows in the table.
 	 *
-	 * @param   string  Column to count by
-	 * @param   bool    Whether to count only distinct rows (by column)
-	 * @param   array   Query where clause(s)
-	 * @param   string  Column to group by
+	 * @see http://fuelphp.jp/docs/1.7/classes/model_crud/methods.html#/method_count Model_Crud - クラス - FuelPHP ドキュメント
+	 * @param   string  $column   Column to count by
+	 * @param   bool    $distinct Whether to count only distinct rows (by column)
+	 * @param   array   $where    Query where clause(s)
+	 * @param   string  $group_by Column to group by
 	 * @return  int     The number of rows OR false
 	 */
 	public static function count($column = null, $distinct = true, $where = array(), $group_by = null) {
@@ -464,8 +466,9 @@ abstract class Model_Base
 	// =======================================
 	/**
 	 * INSERT, UPDATE, INSERT or UPDATE, DELETEを同一トランザクション配下で行う
+	 * 
 	 * NOTE: 同一アクション(insertやupdate)の中の順序は指定できるが、アクション自体の実行順は指定できないことに注意。
-	 *       必ずinsert(), update(), save(), delete()の順でモデルが存在するだけ実行される。
+	 * 必ずinsert(), update(), save(), delete()の順でモデルが存在するだけ実行される。
 	 * 
 	 * @param  Model_Base[] $inserts insert()を呼び出したいModel_Baseのインスタンスの配列 
 	 * @param  Model_Base[] $updates update()を呼び出したいModel_Baseのインスタンスの配列
@@ -510,42 +513,43 @@ abstract class Model_Base
 
 	/**
 	 * 挿入/更新処理の直前に実行できるフック
+	 * 
 	 * insert, update, saveメソッドでコールされる。
 	 * 
-	 * @param  mixed $query `\Database_Query_Builder_Insert`か`\Database_Query_Builder_Update`
 	 * @return void
 	 */
 	protected function before_save() {}
 
 	/**
 	 * 挿入処理の直前に実行できるフック
+	 * 
 	 * insertメソッドでコールされる。
 	 * 
-	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
 	protected function before_insert() {}
 
 	/**
 	 * 更新処理の直前に実行できるフック
+	 * 
 	 * updateメソッドでコールされる。
 	 * 
-	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
 	protected function before_update() {}
 
 	/**
 	 * 削除処理の直前に実行できるフック
+	 * 
 	 * deleteメソッドでコールされる。
 	 * 
-	 * @param  \Database_Query $query クエリビルダのインスタンス
 	 * @return void
 	 */
 	protected function before_delete() {}
 
 	/**
 	 * バリデーション処理の直前に実行できるフック
+	 * 
 	 * validateメソッドでコールされる。
 	 * 
 	 * @return void
@@ -553,7 +557,8 @@ abstract class Model_Base
 	protected function before_validate() {}
 
 	/**
-	 * find処理の直後に実行できるフック  
+	 * find処理の直後に実行できるフック
+	 *   
 	 * find, findBy, findLikeでコールされる。
 	 * このメソッドの戻り値が、findメソッドの戻り値として使用されるので扱いに要注意。
 	 * このメソッドだけstaticなので要注意。
@@ -565,6 +570,7 @@ abstract class Model_Base
 
 	/**
 	 * 保存処理の直後に実行できるフック
+	 * 
 	 * insert, update, saveメソッドでコールされる。
 	 * 
 	 * @param  boolean $success 保存に成功したらtrue
@@ -574,6 +580,7 @@ abstract class Model_Base
 
 	/**
 	 * 挿入処理の直後に実行できるフック
+	 * 
 	 * insertメソッドでコールされる。
 	 * 
 	 * @param  boolean $success 挿入に成功したらtrue
@@ -583,6 +590,7 @@ abstract class Model_Base
 
 	/**
 	 * 更新処理の直後に実行できるフック
+	 * 
 	 * updateメソッドでコールされる。
 	 * 
 	 * @param  boolean $success 更新に成功したらtrue
@@ -592,6 +600,7 @@ abstract class Model_Base
 
 	/**
 	 * 削除処理の直後に実行できるフック
+	 * 
 	 * deleteメソッドでコールされる。
 	 * 
 	 * @param  boolean $success 削除に成功したらtrue
@@ -601,6 +610,7 @@ abstract class Model_Base
 
 	/**
 	 * バリデーション処理の直後に実行できるフック
+	 * 
 	 * validateメソッドでコールされる。
 	 * 
 	 * @param  boolean $success バリデーションに通過したらtrue
@@ -622,7 +632,6 @@ abstract class Model_Base
 
 	/**
 	 * トランザクションを張りその中で処理を実行する
-	 * @todo サンプルがショボすぎるのでもうちょい実用性のあるサンプルを書く
 	 *
 	 * ### sample
 	 * ```php
@@ -633,6 +642,7 @@ abstract class Model_Base
 	 * }
 	 * ```
 	 *
+	 * @todo サンプルが簡素すぎるので実用性のあるサンプルを書く
 	 * @param Clusure $callback トランザクション内で実行する処理
 	 * @param mixed   $params   コールバック関数に渡す引数を可変長で受け取る
 	 * @return mixed コールバック関数の戻り値、途中でcatchされたらfalse

@@ -2,6 +2,15 @@
 
 namespace Base;
 
+/**
+ * 企業ID別のログを吐くためのクラス
+ * 
+ * Monologというライブラリを拡張しFuelデフォルトのログのように全企業混合ではなく、企業ID別にログを吐けるようにした
+ * コンストラクタの説明にサンプルと動作例が書かれています
+ * 
+ * 使用可能なメソッドについてはMonologのドキュメントをご覧下さい
+ * @see https://github.com/Seldaek/monolog Seldaek/monolog
+ */
 class Logger extends \Monolog\Logger
 {
 	/**
@@ -26,7 +35,7 @@ class Logger extends \Monolog\Logger
 	 * 企業ごとにログファイルを分けたいので、企業モデルのインスタンスを受け取る
 	 * また、識別子を渡すことができるので、機能毎にログをフィルタしたいときなどはそちらを使用すること
 	 * 
-	 * ## 実行コード(サンプル)
+	 * #### 実行コード(サンプル)
 	 * ```php
 	 * <?php
 	 * $company       = Model_Company::find(1);
@@ -39,7 +48,7 @@ class Logger extends \Monolog\Logger
 	 * $log_hogehoge->warn('XXXXXXXXIIIIIIII');
 	 * ```
 	 * 
-	 * ## 上記コードで生成される結果のログファイル（例）
+	 * #### 上記コードで生成される結果のログファイル（例）
 	 * ```
 	 * [2014-08-19 15:58:35] hogehoge.INFO: xxxxx [] []
 	 * [2014-08-19 15:59:23] hogehoge.DEBUG: hogehoge [] []
@@ -47,7 +56,7 @@ class Logger extends \Monolog\Logger
 	 * [2014-08-19 16:02:26] hogehoge.WARNING: XXXXXXXXIIIIIIII [] []
 	 * ```
 	 * 
-	 * @param Model_Company $company    企業モデル
+	 * @param \Model_Company $company    企業モデル
 	 * @param string        $identifier ログに付与する識別子、省略すると空文字列
 	 */
 	public function __construct(\Model_Company $company, $identifier = '')

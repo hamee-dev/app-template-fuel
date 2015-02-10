@@ -7,9 +7,7 @@ require_once __DIR__.DS.'..'.DS.'..'.DS.'neApiClient.php';
 /**
  * ネクストエンジンAPIクライアント
  * 
- * 例外による処理の振り分けを実装しているのは本クラスなので、そちらを参照。
- * @see Nextengine\Api\Client_Router
- * @see Nextengine\Api\Client_Batch
+ * 例外による処理の振り分けを実装しているのはClient_Routerクラスなので、そちらを参照。
  */
 class Client extends \neApiClient
 {
@@ -37,10 +35,11 @@ class Client extends \neApiClient
 
 	/**
 	 * FuelPHP式（ファクトリメソッド）のコンストラクタ
+	 * 
 	 * 内部は単にコンストラクタを呼ぶだけ
 	 *
-	 * @param  array      $config 設定値（この値が優先される）
-	 * @return Nextengine\Api\Client
+	 * @param  array      $config 設定値（$_defaultsプロパティをこの値で上書きする）
+	 * @return \Nextengine\Api\Client
 	 */
 	public static function forge(array $config = array())
 	{
@@ -51,9 +50,8 @@ class Client extends \neApiClient
 	/**
 	 * コンストラクタに与えられた設定でデフォルト設定を上書きし、接続に必要な情報を格納する
 	 * 
-	 * @param  array      $config 設定値（この値が優先される）
+	 * @param  array $config   設定値（この値が優先される）
 	 * @param  bool  $redirect リダイレクトの指定が来た時に強制的にリダイレクトをするか否か。デフォルトはfalse(しない)
-	 * @return Nextengine\Api\Client
 	 */
 	public function __construct(array $config = array(), $redirect = false)
 	{
@@ -76,12 +74,15 @@ class Client extends \neApiClient
 	/**
 	 * ネクストエンジンAPIを叩く
 	 * 
-	 * ### 親クラスからの拡張点
+	 * #### 親クラスからの拡張点
 	 * - userプロパティがセットされており、アクセストークンが更新されたら自動でDBの値を更新する
 	 * - レスポンスに含まれるresultフィールドの値がsuccessでないなら、例外を投げるという処理を追加した
 	 *
+	 * @param string $path         親クラスのメソッドを参照
+	 * @param array  $api_params   親クラスのメソッドを参照
+	 * @param string $redirect_uri 親クラスのメソッドを参照
+	 * @return mixed APIのレスポンス。詳しくは[http://api.next-e.jp/request_url.php]()を参照。
 	 * @throws NextengineApiException
-	 * @return mixed APIのレスポンス。詳しくはhttp://api.next-e.jp/request_url.phpを参照。
 	 */
 	public function apiExecute($path, $api_params = array(), $redirect_uri = NULL) {
 		$before_exec_access_token = $this->_access_token;
@@ -116,11 +117,13 @@ class Client extends \neApiClient
 	/**
 	 * ネクストエンジンログインが不要なAPIを実行する
 	 * 
-	 * ## 親クラスからの拡張点
+	 * #### 親クラスからの拡張点
 	 * エラー処理を追加
 	 *
+	 * @param string $path       親クラスのメソッドを参照
+	 * @param array  $api_params 親クラスのメソッドを参照
+	 * @return mixed APIのレスポンス。詳しくは[http://api.next-e.jp/request_url.php]()を参照。
 	 * @throws NextengineApiException
-	 * @return mixed APIのレスポンス。詳しくはhttp://api.next-e.jp/request_url.phpを参照。
 	 */
 	public function apiExecuteNoRequiredLogin($path, $api_params = array()) {
 		$response = parent::apiExecuteNoRequiredLogin($path, $api_params);
@@ -229,7 +232,7 @@ class Client extends \neApiClient
 	/**
 	 * メール送信ユーティリティ
 	 * 
-	 * @param  string,array $to      宛先（配列で複数指定可能）
+	 * @param  string|array $to      宛先（配列で複数指定可能）
 	 * @param  string       $subject 件名
 	 * @param  string       $body    本文
 	 * @param  string       $from    送信元（省略するとconfigにあるデフォルトのfromが適用される）

@@ -10,6 +10,10 @@ namespace Base;
  */
 abstract class Controller_Auth extends Controller_Base
 {
+	/**
+	 * ネクストエンジンAPIクライアントのインスタンスを保持する
+	 * @var \Nextengine\Api\Client
+	 */
 	protected static $client;
 
 	/**
@@ -118,9 +122,9 @@ abstract class Controller_Auth extends Controller_Base
 	 * インスタンスは、既にDBに存在するデータから取得するか、存在しない場合newされたものが渡される
 	 * ログイン処理の度に毎回更新すべき情報を全てセットすること。
 	 * 
-	 * @param  Model_Company $company      （DBから取得した or newした）企業モデルのインスタンス
+	 * @param  \Model_Company $company      （DBから取得した or newした）企業モデルのインスタンス
 	 * @param  array          $company_info ログイン企業の情報（連想配列）
-	 * @return Model_Company プロパティに値をセットしたインスタンス
+	 * @return \Model_Company プロパティに値をセットしたインスタンス
 	 */
 	protected function _create_company(\Model_Company $company, array $company_info)
 	{
