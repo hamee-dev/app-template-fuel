@@ -8,12 +8,12 @@ return array(
 	'debug' => array(
 		// デバッグや通知メールを送るべき開発者
 		'developer'		=> array(
-			'inoue.shingo@hamee.co.jp',
+			'developer@example.com',
 		),
 
 		// デバッグや通知メールを送るべき営業
 		'sales'	=> array(
-			'inoue.shingo@hamee.co.jp',
+			'sales@example.com',
 		),
 
 		'mail_subject' => "[NE-API] NextengineApiException"
