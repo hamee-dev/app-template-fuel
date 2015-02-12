@@ -10,7 +10,22 @@ namespace Base;
  */
 abstract class Controller_Base extends \Controller_Template
 {
+	/**
+	 * 現在ログインしている企業情報を保持する
+	 * 
+	 * ログインしていない場合はnullが格納されている
+	 * 
+	 * @var \Model_Company
+	 */
 	protected $company = null;
+
+	/**
+	 * 現在ログインしているユーザ情報を保持する
+	 * 
+	 * ログインしていない場合はnullが格納されている
+	 * 
+	 * @var \Model_User
+	 */
 	protected $user = null;
 
 	/**
