@@ -22,7 +22,7 @@ users:
         company_id: 1
         uid: e6ee55c1d0abe34179ef2ff2f820d9c691151463c3c41254dc4fb41f071a51dd32b7806cd4d004e29f8b4a6038ec32a1108adc29fa5573fbfc5a19da6e8062fe
         next_engine_id: 378fc6b68130f0090644b837ab0ae295625c17a5a4a8994f5d14f9fd645f21528e170bff4d517eec23d515dcc61e9c85dcfce7145016a82b69714422910b80ce
-        email: inoue.shingo+stagingtest@hamee.co.jp
+        email: sample@example.com
         access_token: a3fabb1b9bd2781b3646f53bb6b1a1ebed9067ca9317d9776c47b8bd3a9cec12083f00488682ec24e2ad1138cbfb281519bc612cc8c4195baee2bab7683bd33e
         refresh_token: 3c1031eaf90abe6be2e1bc63ae02f7bbd21f7f07380f844588e58bf2f63dcd7b3db1d6528d86a26860aca79443475a86a9c326c19572a6590dec59bbe408277e
 
