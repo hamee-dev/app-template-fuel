@@ -1,7 +1,4 @@
 <?php
-/**
- * @author Hamee <development@hamee.co.jp>
- */
 
 namespace Base;
 
