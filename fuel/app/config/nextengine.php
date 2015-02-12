@@ -1,8 +1,8 @@
 <?php
 
 return array(
-	'client_id' => '2zG7d5MjXPh4m8',
-	'client_secret' => 'FTNubmlpyAgE5e3BnqWt6IHJ18voxVkMS9Yh4Zjc',
+	'client_id' => 'XXXXXXXXXXXXXX',
+	'client_secret' => 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
 	'redirect_uri' => 'https://192.168.33.10/auth/callback',
 
 	'debug' => array(
