@@ -1,6 +1,6 @@
 <?php
 /**
- * @author Shingo Inoue<inoue.shingo@hamee.co.jp>
+ * @author Hamee <development@hamee.co.jp>
  */
 
 namespace Base;
