@@ -631,16 +631,8 @@ abstract class Model_Base
 	/**
 	 * トランザクションを張りその中で処理を実行する
 	 *
-	 * ### sample
-	 * ```php
-	 * protected function executeInTransaction($query) {
-	 * 	return self::transactionDo(function($query) {
-	 * 		return $query->execute();
-	 * 	}, $query);
-	 * }
-	 * ```
-	 *
-	 * @todo サンプルが簡素すぎるので実用性のあるサンプルを書く
+	 * 使用例については`actionInTransaction`メソッドを参照
+	 * 
 	 * @param Clusure $callback トランザクション内で実行する処理
 	 * @param mixed   $params   コールバック関数に渡す引数を可変長で受け取る
 	 * @return mixed コールバック関数の戻り値、途中でcatchされたらfalse
