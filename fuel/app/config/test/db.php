@@ -8,9 +8,9 @@
 return array(
 	'default' => array(
 		'connection'  => array(
-			'dsn'        => 'mysql:host=192.168.56.110;port=3306;dbname=ne_base',
-			'username'   => 'root',
-			'password'   => 'hamee831',
+			'dsn'        => 'mysql:host=XXX.XXX.XXX.XXX;dbname=XXXXX',
+			'username'   => 'XXXXXXXXXX',
+			'password'   => 'XXXXXXXXXX',
 		),
 	),
 );
