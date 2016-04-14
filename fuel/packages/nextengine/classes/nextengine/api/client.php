@@ -88,18 +88,18 @@ class Client extends \neApiClient
 		$before_exec_access_token = $this->_access_token;
 		$response = parent::apiExecute($path, $api_params, $redirect_uri);
 
-		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php
-		//       エラー時の振る舞いについては、本クラスのfailoverメソッドを参照。
-		if($response['result'] !== self::RESULT_SUCCESS) {
-			$this->failover($response['code'], $response['message']);
-		}
-
 		// APIを叩く前後でアクセストークンが変わっていたら、ユーザモデルを更新してDBに反映
 		// ただしユーザモデルが格納されていない場合もあるので、その場合はその処理を行わない
 		if(!is_null($this->user) && ($before_exec_access_token !== $this->_access_token)) {
 			$this->user->access_token  = $this->_access_token;
 			$this->user->refresh_token = $this->_refresh_token;
 			$this->user->save();
+		}
+
+		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php
+		//       エラー時の振る舞いについては、本クラスのfailoverメソッドを参照。
+		if($response['result'] !== self::RESULT_SUCCESS) {
+			$this->failover($response['code'], $response['message']);
 		}
 
 		return $response;
