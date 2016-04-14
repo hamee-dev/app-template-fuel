@@ -95,6 +95,7 @@ class neApiClient {
 		curl_setopt($this->_curl, CURLOPT_SSL_VERIFYHOST,	2) ;
 		curl_setopt($this->_curl, CURLOPT_TIMEOUT,			3600) ;
 		curl_setopt($this->_curl, CURLOPT_RETURNTRANSFER,	true) ;
+		curl_setopt($this->_curl, CURLOPT_FAILONERROR,		true) ;
 		if(!is_null($redirect_uri)) {
 			curl_setopt($this->_curl, CURLOPT_REFERER,		'https://'.parse_url($redirect_uri, PHP_URL_HOST)) ;
 		}
