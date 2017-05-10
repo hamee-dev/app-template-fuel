@@ -2,7 +2,7 @@
 
 namespace Fuel\Tasks;
 
-class User
+class User extends \Base\Runner
 {
 	/**
 	 * This method gets ran when a valid method name is not used in the command.
@@ -53,7 +53,7 @@ class User
 
 	/**
 	 * トークンのリフレッシュを行う実体部。
-	 * 
+	 *
 	 * @param Model_User $user トークンを更新したいユーザオブジェクト
 	 * @return boolean 更新に成功したらtrue、更新が必要なかった場合もtrue
 	 */
@@ -64,4 +64,19 @@ class User
 
 		$client->apiExecute('/api_v1_login_user/info');
 	}
+
+	/**
+	 * Fatal error のハンドラー
+	 *
+	 * @param  array $error エラー
+	 */
+	protected function handle_fatal_error($error)
+	{
+		// NOTE: 適宜エラー処理を実装してください。;
+		echo 'Fatal error has occurred.' . PHP_EOL;
+ 		foreach ($error as $key => $value) {
+			echo 'error[' . $key . '] => ' . $value . PHP_EOL;
+		}
+	}
+
 }
