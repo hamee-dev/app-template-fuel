@@ -14,4 +14,6 @@ Autoloader::add_classes(array(
 
 	'Base\\Logger'           => __DIR__ . '/classes/logger.php',
 
+	'Base\\Runner'           => __DIR__ . '/tasks/base.php',
+
 ));

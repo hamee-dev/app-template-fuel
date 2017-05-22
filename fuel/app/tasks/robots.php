@@ -24,7 +24,7 @@ namespace Fuel\Tasks;
  * @author		Phil Sturgeon
  */
 
-class Robots
+class Robots extends \Base\Runner
 {
 
 	/**
@@ -40,7 +40,7 @@ class Robots
 	 *
 	 * @return string
 	 */
-	public static function run($speech = null)
+	public function run($speech = null)
 	{
 		if ( ! isset($speech))
 		{
@@ -107,6 +107,20 @@ class Robots
 			     |_____| |_____|
 			     |HHHHH| |HHHHH|", 'blue');
 
+	}
+
+	/**
+	 * Fatal error のハンドラー
+	 *
+	 * @param  array $error エラー
+	 */
+	protected function handle_fatal_error($error)
+	{
+		// NOTE: 適宜エラー処理を実装してください。;
+		echo 'Fatal error has occurred.' . PHP_EOL;
+ 		foreach ($error as $key => $value) {
+			echo 'error[' . $key . '] => ' . $value . PHP_EOL;
+		}
 	}
 }
 
