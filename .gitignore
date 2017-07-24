@@ -32,3 +32,6 @@ desktop.ini
 /fuel/app/cache/*/*
 /fuel/app/config/crypt.php
 .vagrant/
+
+# ignore phpdoc output
+/output

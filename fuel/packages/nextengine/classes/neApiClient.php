@@ -45,6 +45,12 @@ class neApiClient {
 	// cUrlハンドル
 	protected	$_curl			= NULL ;
 
+	////////////////////////////////////////////////////////////////////////////
+	// コードを実行するPHPのバージョンに応じてcurlの処理を変更するための定数
+	////////////////////////////////////////////////////////////////////////////
+	const PHP_VERSION_REQUIRED_CONSIDERATION = '5.5.0' ;
+	const VERSION_COMPARE_OPERATOR = ">=" ;
+
 	/**
 	* インスタンス生成時、実行環境に合わせた値を引数に指定して下さい。
 	* 
@@ -198,6 +204,18 @@ class neApiClient {
 		return($response) ;
 	}
 
+	/**
+	 * /api_v1_storage/downloadのレスポンスを元にファイルを解凍するメソッドです。
+	 * @param  array	$response	/api_v1_storage/downloadのレスポンス
+	 * @return string	解凍されたファイルデータの文字列。file_put_contents等でファイルに書き込むことでファイルを使用可能。
+	 * @note   参考：http://php.net/manual/ja/function.file-put-contents.php
+	 */
+	public function decompressionFile($response) {
+		if(isset($response["file_data"])) {
+			return gzdecode(base64_decode($response['file_data']));
+		}
+	}
+
 	///////////////////////////////////////////////////////
 	// 以下は全てSDKの内部処理用のメソッドです
 	///////////////////////////////////////////////////////
@@ -288,12 +306,32 @@ class neApiClient {
 		exit ;
 	}
 
+	/**
+	* curlを実行します。
+	* @return  APIの実行結果
+	* @note multipartでpostする際の予約語として"file_data"というキー値を使用しています。
+	*/
 	protected function post($url, $params) {
 		curl_setopt($this->_curl, CURLOPT_URL,				$url) ;
-		curl_setopt($this->_curl, CURLOPT_POSTFIELDS,		$this->getUrlParams($params)) ;
 		curl_setopt($this->_curl, CURLOPT_POST,				true) ;
 		
+		if(!isset($params['file_data'])) {
+			curl_setopt($this->_curl, CURLOPT_POSTFIELDS, $this->getUrlParams($params)) ;
+		} else {
+			// バージョンによってメソッドの利用が非推奨になっているため実行バージョンを判別して処理を分岐させる。
+			if(version_compare(PHP_VERSION,
+				self::PHP_VERSION_REQUIRED_CONSIDERATION,
+				self::VERSION_COMPARE_OPERATOR)
+			) {
+				$params['file_data'] = new CURLFile($params['file_data']) ;
+				curl_setopt($this->_curl, CURLOPT_SAFE_UPLOAD, true);
+			} else {
+				$params['file_data'] = '@'.$params['file_data'] ;
+			}
+			curl_setopt($this->_curl, CURLOPT_POSTFIELDS, $params) ;
+		}
 		$response = curl_exec($this->_curl) ;
+
 		if( $response === FALSE ) {
 			throw new Exception('システムエラーが発生しました(curlの実行に失敗['. curl_error($this->_curl) .'])。') ;
 		}
