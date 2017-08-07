@@ -91,9 +91,7 @@ class Client extends \neApiClient
 		// APIを叩く前後でアクセストークンが変わっていたら、ユーザモデルを更新してDBに反映
 		// ただしユーザモデルが格納されていない場合もあるので、その場合はその処理を行わない
 		if(!is_null($this->user) && ($before_exec_access_token !== $this->_access_token)) {
-			$this->user->access_token  = $this->_access_token;
-			$this->user->refresh_token = $this->_refresh_token;
-			$this->user->save();
+			$this->user->updateCredentials($this->_access_token, $this->_refresh_token, $response['access_token_end_date']);
 		}
 
 		// NOTE: エラーの種類については→を参照：http://api.next-e.jp/message.php

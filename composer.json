@@ -141,7 +141,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
-        "phpunit/dbunit": ">=1.2"
+        "phpunit/dbunit": ">=1.2",
+        "phpdocumentor/phpdocumentor": "v2.0.0",
+        "phpdocumentor/reflection-docblock": "~2.0"
+
     },
     "suggest": {
         "dwoo/dwoo" : "Allow Dwoo templating with the Parser package",
@@ -163,6 +166,9 @@
     "scripts": {
         "post-install-cmd": [
             "php oil r install"
+        ],
+         "create-api-doc": [
+            "phpdoc run --template clean -d  fuel/packages/base/ -d fuel/packages/nextengine/ -d fuel/app"
         ]
     },
     "minimum-stability": "dev"

@@ -86,21 +86,38 @@ abstract class Controller_Auth extends Controller_Base
 		//       見つかればそのデータを上書きして更新、見つからなければ新規インスタンスに値をセットして挿入する
 		// NOTE: カラム名はmain_function_idだが、取得した企業情報のフィールドでは`company_id`なことに注意。
 		$company_info = $this->_fetch_company_info();
-		$companies    = \Model_Company::findBy('main_function_id', $company_info['company_id']);
-		$company      = ((count($companies) > 0) ? $companies[0] : new \Model_Company());
-
-		$company = $this->_create_company($company, $company_info);
-		$company->save();
-
-
-		// NOTE: ユーザ情報を取得し、uid(UNIQUE)でSELECTをかける。
-		//       見つかればそのデータを上書きして更新、見つからなければ新規インスタンスに値をセットして挿入する
 		$user_info = $this->_fetch_user_info();
-		$users     = \Model_User::findBy('uid', $user_info['uid']);
-		$user      = ((count($users) > 0) ? $users[0] : new \Model_User());
 
-		$user = $this->_create_user($user, $user_info, $company->id);
-		$user->save();
+		try {
+			\DB::start_transaction();
+
+			$companies    = \Model_Company::findBy('main_function_id', $company_info['company_id']);
+			$company      = ((count($companies) > 0) ? $companies[0] : new \Model_Company());
+			$company = $this->_create_company($company, $company_info);
+			$company->save();
+
+			// NOTE: uid(UNIQUE)でSELECTをかける。
+			//       見つかればそのデータを上書きして更新、見つからなければ新規インスタンスに値をセットして挿入する
+			$users     = \Model_User::findBy('uid', $user_info['data'][0]['uid']);
+			$user      = ((count($users) > 0) ? $users[0] : new \Model_User());
+			$user = $this->_create_user($user, $user_info, $company->id);
+			// INSERT OR UPDATEを行う
+			// INSERT時にはアクセストークンの挿入が必要、UPDATE時にはアクセストークンの更新は不要
+			// 既にアクセストークンがDBに存在していれば、あとはNE APIクライアント側が更新制御をするため
+			$insert_columns = array_keys($user->toArray());
+			$update_columns = array_diff($insert_columns, [
+				'access_token_end_date',
+				'access_token',
+				'refresh_token',
+			]);
+			$user->save($insert_columns, $update_columns);
+			$user->updateCredentials($user->access_token, $user->refresh_token, $user->access_token_end_date);
+
+			\DB::commit_transaction();
+		} catch (Exception $e) {
+			\DB::rollback_transaction();
+			throw $e;
+		}
 
 		// セッションにログインユーザの情報をセット
 		\Session::set($session_key_company, $company->id);
@@ -144,12 +161,13 @@ abstract class Controller_Auth extends Controller_Base
 	 */
 	protected function _create_user(\Model_User $user, array $user_info, $company_id)
 	{
-		$user->company_id     = $company_id;
-		$user->uid            = $user_info['uid'];
-		$user->next_engine_id = $user_info['pic_ne_id'];
-		$user->email          = $user_info['pic_mail_address'];
-		$user->access_token   = static::$client->_access_token;
-		$user->refresh_token  = static::$client->_refresh_token;
+		$user->company_id            = $company_id;
+		$user->uid                   = $user_info['data'][0]['uid'];
+		$user->next_engine_id        = $user_info['data'][0]['pic_ne_id'];
+		$user->email                 = $user_info['data'][0]['pic_mail_address'];
+		$user->access_token_end_date = $user_info['access_token_end_date'];
+		$user->access_token          = static::$client->_access_token;
+		$user->refresh_token         = static::$client->_refresh_token;
 
 		return $user;
 	}
@@ -175,7 +193,6 @@ abstract class Controller_Auth extends Controller_Base
 	protected function _fetch_user_info()
 	{
 		$user_info = self::$client->apiExecute('/api_v1_login_user/info');
-		$user_info = $user_info['data'][0];
 
 		return $user_info;
 	}

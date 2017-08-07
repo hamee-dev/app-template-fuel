@@ -57,7 +57,7 @@ abstract class Controller_Base extends \Controller_Template
 	 */
 	public static function _init() {
 		// 言語のセット
-		$locale = self::getLocale($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		$locale = self::getLocale(\Arr::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', \Config::get('language_fallback')));
 		\Config::set('language', $locale);
 
 		// 言語ファイルのロード

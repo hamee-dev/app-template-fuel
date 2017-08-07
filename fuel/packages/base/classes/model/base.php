@@ -219,23 +219,25 @@ abstract class Model_Base
 	 * NOTE: MySQL構文のため、MySQL以外のDBでsaveメソッドを使用することは出来ません。
 	 * 
 	 * @param  string[] $columns 挿入または更新するカラム名を指定。省略された場合は定義されている全てのプロパティを挿入/更新する
+	 * @param  string[] $update_columns 更新するカラムがINSERTとは別の場合に指定。省略された場合$columnsを使用
 	 * @return bool 挿入or削除に成功したら`true`, 失敗したら`false`
 	 */
-	public function save(array $columns = array()) {
+	public function save(array $columns = [], array $update_columns = []) {
 		$this->hook('before_save');
 
 		$this->updated_at = \DB::expr('NOW()');
 
 		// 挿入/更新するカラム名が与えられていたら、そのカラムだけ挿入/更新する
+		if (empty($update_columns)) {
+			$update_columns = $columns;
+		}
 		$attrs = $this->toArray();
-		if(count($columns) > 0) {
-			$_attrs = array();
-
-			foreach($columns as $column) {
-				$_attrs[$column] = $attrs[$column];
-			}
-
-			$attrs = $_attrs;
+		$updates = $this->toArray();
+		if(!empty($columns)) {
+			$attrs = \Arr::subset($attrs, $columns);
+		}
+		if(!empty($update_columns)) {
+			$updates = \Arr::subset($updates, $update_columns);
 		}
 
 		// FuelPHPにON DUPLICATE KEY UPDATEの機能がサポートされていないので、
@@ -244,7 +246,7 @@ abstract class Model_Base
 
 		// ON DUPLICATE KEY UPDATE以降で更新する値を、自前でなくクエリビルダを利用して生成する
 		// NOTE: かなりゴリ押し。テーブル名が大文字でSETとかだった場合にバグります。
-		$update_sql    = \DB::update($this->_getTableName())->set($attrs)->compile();
+		$update_sql    = \DB::update($this->_getTableName())->set($updates)->compile();
 		$set_pos       = mb_strpos($update_sql, ' SET ');
 		$after_set_sql = mb_substr($update_sql, $set_pos + 5);	// ' SET 'の3文字を読み飛ばす
 
